@@ -6,6 +6,8 @@ A comprehensive data analysis project examining the relationship between Uber ri
 **Course:** CMSE 830 - Foundations of Data Science  
 **Institution:** Michigan State University
 
+**Live Demo:** https://cmse-830-project-ni.streamlit.app/
+
 ## Project Overview
 
 This project analyzes Uber ride booking data from the NCR (National Capital Region) of Delhi combined with historical weather data to understand:
@@ -23,61 +25,118 @@ The datasets are merged based on timestamp matching (within 30-minute windows) t
 
 ## Features
 
-### 1. Initial Data Analysis (IDA)
+### 1. Data Collection & Preparation
+- **Multiple Data Sources:** Integration of Uber booking data with weather API data
+- **Data Cleaning:** Comprehensive missing value analysis and handling
+- **Advanced Integration:** Time-based merging with 30-minute window tolerance
+
+### 2. Initial Data Analysis (IDA)
 - Missing value analysis and visualization
+- Duplicate detection and removal
 - Data quality assessment
 - Summary statistics for numeric and categorical variables
 - Distribution analysis with interactive visualizations
+- Data type documentation
 
-### 2. Data Preprocessing
-- Handling missing values using KNN and EM algorithms
-- One-hot encoding for categorical variables
-- Feature scaling using MinMaxScaler (0-1 normalization)
-- Duplicate removal and data cleaning
+### 3. Data Preprocessing
+- **Multiple Imputation Techniques:**
+  - K-Nearest Neighbors (KNN) imputation
+  - Expectation-Maximization (EM) algorithm
+  - Mean/Median baseline imputation
+- **Feature Engineering:**
+  - One-hot encoding for categorical variables
+  - Cyclical encoding for temporal features
+  - Feature scaling using MinMaxScaler (0-1 normalization)
+- **Data Quality Improvements:**
+  - Duplicate removal
+  - Timestamp standardization
+  - Data type validation
 
-### 3. Exploratory Data Analysis (EDA)
-- Correlation analysis between features
-- Booking status distribution analysis
-- Vehicle type analysis
-- Temporal pattern analysis (hourly booking trends)
-- Weather impact on cancellation rates
-- Interactive visualizations with Plotly
+### 4. Exploratory Data Analysis (EDA)
+- **Correlation Analysis:**
+  - Interactive heatmaps with multiple methods (Pearson, Spearman, Kendall)
+  - Target feature correlation ranking
+- **Visualization Types:**
+  - Histograms with marginal distributions
+  - Box plots with outlier detection
+  - Pie charts for class balance
+  - Bar charts for categorical frequencies
+- **Temporal Analysis:**
+  - Hourly booking patterns
+  - Cancellation trends over time
+- **Weather Impact:**
+  - Quantile-based weather impact curves
+  - Interactive binning controls
+
+### 5. Advanced Analysis
+- **Multi-dimensional Visualizations:**
+  - 3D scatter plots with rotation
+  - Interactive scatter matrices
+  - Distribution comparisons by category
+- **Statistical Analysis:**
+  - In-depth correlation studies
+  - Class balance analysis
+  - Feature importance assessment
+
+### 6. Imputation Comparison
+- Side-by-side comparison of imputation methods
+- Performance metrics (computation time, variance preservation)
+- Visual distribution comparisons before/after imputation
+- Recommendations for method selection
+
+## Interactive Features
+
+The Streamlit app includes 10+ interactive elements:
+- Navigation menu with 6 distinct pages
+- Variable selectors for custom analysis
+- Correlation method toggles
+- Sliders for binning and feature selection
+- Multi-select for scatter matrix dimensions
+- Tabs for organized content exploration
+- Interactive Plotly charts (zoom, pan, hover)
 
 ## Installation & Setup
 
 ### Prerequisites
 
 - Python 3.13 or higher
+- pip package manager
 
-### Step 1: Install Dependencies
+### Installation Steps
 
+1. **Clone the repository:**
 ```bash
+git clone [your-repo-url]
 cd CMSE-830-Project
+```
+
+2. **Install dependencies:**
+```bash
 pip install -r requirements.txt
 ```
 
-### Step 3: Verify Data Files
-
-Ensure all data files are present in the `data/` directory. The main datasets should be:
-- `ncr_ride_bookings.csv`
-- `rides_with_weather.csv`
-- `rides_with_weather_processed.csv`
+3. **Verify data files:**
+Ensure all data files are present in the `data/` directory:
+- `ncr_ride_bookings.csv` (raw Uber data)
+- `weather_data.csv` (compiled weather data)
+- `rides_with_weather.csv` (merged dataset)
+- `rides_with_weather_processed.csv` (normalized dataset)
 
 ## Usage
 
-### Running the Streamlit App
+### Running Locally
 
-To launch the interactive web application:
+Launch the interactive web application:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-The app will open in your default web browser at `http://localhost:8501`
+The app will open in your default browser at `http://localhost:8501`
 
 ### Navigation
 
-The app has three main sections accessible via the sidebar:
+The app has 6 main sections:
 
 1. **Overview** - Project introduction and context
 2. **IDA** - Initial Data Analysis with missing value analysis, distributions, and data types
@@ -98,7 +157,19 @@ Then open:
 
 ## Key Findings
 
-- **Cancellation Rate:** The dataset shows a measurable cancellation rate for ride bookings
-- **Temporal Patterns:** Booking patterns vary significantly by hour of day
-- **Weather Impact:** Weather conditions (temperature, precipitation, humidity) correlate with cancellation rates
-- **Vehicle Type Distribution:** Different vehicle types show varying booking and cancellation patterns
+- **Cancellation Rate:** Measurable cancellation rate varies with weather conditions
+- **Weather Impact:** Temperature, humidity, and precipitation show correlation with cancellations
+- **Temporal Patterns:** Peak booking hours identified with distinct cancellation patterns
+- **Vehicle Types:** Different vehicle types show varying performance across conditions
+- **Data Quality:** EM algorithm provided best balance for imputation on this dataset
+
+
+## Requirements
+
+See `requirements.txt` for full list. Key packages:
+- streamlit >= 1.28.0
+- pandas >= 2.0.0
+- numpy >= 1.24.0
+- plotly >= 5.14.0
+- matplotlib >= 3.7.0
+- seaborn >= 0.12.0
