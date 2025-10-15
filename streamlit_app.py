@@ -11,9 +11,22 @@ from plotly.subplots import make_subplots
 
 @st.cache_data
 def load_csv(path: str) -> pd.DataFrame:
+    """
+    Load CSV file with caching to improve performance.
+
+    Args:
+        path (str): Path to the CSV file
+
+    Returns:
+        pd.DataFrame: Loaded dataframe
+    """
     return pd.read_csv(path)
 
 def page_overview():
+    """
+    Display the project overview page with introduction, data sources,
+    techniques used, and research questions.
+    """
     st.title("Uber Ride Analytics & Weather Impact Analysis")
     st.markdown("""
     ### CMSE 830 Data Analysis Project
@@ -28,70 +41,108 @@ def page_overview():
     **Course:** CMSE 830  
     """)
     
-    st.header("Project Overview")
+    st.header("The Story Behind the Data")
     st.write("""
-    This project analyzes the relationship between Uber ride bookings and weather conditions 
-    in Delhi, India (NCR region) throughout 2024. We examine patterns in ride cancellations, 
-    temporal trends, and the impact of various weather factors on booking behavior.
+    Imagine you in Delhi, and you need to book an Uber to get home. 
+    You open the app, request a ride, and it gets cancelled. Then another. And another. 
+    Frustrated, you wonder: *Is this just bad luck, or is there a pattern here?*
+    
+    This project will explore **Do weather conditions actually impact ride-sharing behavior?** 
+    And if so, how much does rain, temperature, or humidity affect whether your ride gets completed or cancelled?
+    
+    ### Our Dataset of Discovery
+    
+    Collected with over **15,000 Uber ride bookings** from Delhi's National Capital Region and detailed 
+    **hourly weather data** spanning all of 2024, we set out to uncover the hidden patterns. This isn't 
+    just about numbers on a screen—it's about understanding the real-world interplay between weather, 
+    human behavior, and urban mobility.
+    
+    Through this analysis, we explore:
+    - **Weather's Hidden Influence**: How do rain, temperature extremes, and humidity affect cancellation rates?
+    - **Temporal Rhythms**: When are rides most likely to be cancelled? Morning rush? Late night?
+    - **Vehicle Dynamics**: Do different vehicle types show different patterns in challenging weather?
+    - **Data-Driven Insights**: What do correlations reveal about the factors that truly matter?
+    
+    ### Why This Matters
+    
+    Understanding these patterns has real implications:
+    - **For Riders**: Better predict when you might face cancellations and plan accordingly
+    - **For Drivers**: Optimize when and where to drive based on weather conditions
+    - **For Platforms**: Improve algorithms to better match supply and demand during weather events
+    - **For Cities**: Plan better transportation infrastructure and backup options
     """)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Data Sources")
-        st.markdown("""
-        **1. Uber Ride Data**
-        - Source: [Kaggle - Uber Ride Analytics](https://www.kaggle.com/datasets/yashdevladdha/uber-ride-analytics-dashboard)
-        - Contains: Booking details, timestamps, vehicle types, locations, status
-        - Records: ~40,000+ ride bookings
-        
-        **2. Weather Data**
-        - Source: [Visual Crossing Weather API](https://www.visualcrossing.com/)
-        - Coverage: January 2024 - December 2024
-        - Contains: Temperature, precipitation, humidity, wind, visibility, pressure
-        - Granularity: Hourly weather observations
-        """)
-    
-    with col2:
-        st.subheader("Techniques Used")
-        st.markdown("""
-        **Data Preparation:**
-        - Missing value analysis and imputation (KNN, EM algorithms)
-        - Duplicate removal
-        - One-hot encoding for categorical variables
-        - MinMaxScaler normalization
-        - Timestamp merging (30-min windows)
-        
-        **Analysis Methods:**
-        - Correlation analysis
-        - Distribution analysis
-        - Temporal pattern detection
-        - Weather impact assessment
-        - Interactive filtering and exploration
-        """)
-    
-    st.header("Key Research Questions")
+
+    st.subheader("Techniques Used")
     st.markdown("""
-    1. How do weather conditions affect ride cancellation rates?
-    2. What temporal patterns exist in ride booking behavior?
-    3. Which features are most correlated with cancellations?
-    4. How do different vehicle types perform across conditions?
+    **Data Preparation:**
+    - Missing value analysis and imputation (KNN, EM algorithms)
+    - Duplicate removal and data validation
+    - One-hot encoding for categorical variables
+    - MinMaxScaler normalization
+    - Timestamp merging (30-min windows)
+    
+    **Analysis Methods:**
+    - Correlation analysis (Pearson, Spearman, Kendall)
+    - Distribution analysis with interactive visualizations
+    - Temporal pattern detection
+    - Weather impact assessment
+    - Multi-dimensional relationship exploration
+    - Interactive filtering and exploration
     """)
 
 def page_data_collection():
+    """
+    Display the data collection and preparation page, showing raw data sources
+    and the integration process.
+    """
     st.header("Data Collection and Preparation")
-    
-    st.subheader("Multiple Data Sources")
-    
+
+    # Display data source information at the top
+    st.write("""
+    This project combines two primary data sources to analyze the relationship between 
+    weather conditions and Uber ride cancellations in Delhi, India throughout 2024.
+    """)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        **Uber Ride Booking Dataset**
+        - **Source**: [Kaggle - Uber Ride Analytics](https://www.kaggle.com/datasets/yashdevladdha/uber-ride-analytics-dashboard)
+        - **Records**: ~15,000 ride bookings
+        - **Time Period**: Throughout 2024
+        - **Location**: Delhi NCR (National Capital Region), India
+        - **Key Features**: Booking details, timestamps, vehicle types, locations, booking status
+        """)
+
+    with col2:
+        st.markdown("""
+        **Weather Dataset**
+        - **Source**: [Visual Crossing Weather API](https://www.visualcrossing.com/)
+        - **Coverage**: January 2024 - December 2024
+        - **Location**: Delhi, India (NCR region)
+        - **Granularity**: Hourly observations
+        - **Key Features**: Temperature, precipitation, humidity, wind speed, visibility, atmospheric pressure
+        """)
+
+    st.info("These datasets were combined based on timestamp matching within 30-minute windows to create a comprehensive dataset for analysis.")
+
+    st.markdown("---")
+
+    st.subheader("Detailed Data Exploration")
+
+    # Create tabs for different data sources
     tab1, tab2, tab3 = st.tabs(["Uber Ride Data", "Weather Data", "Data Integration"])
     
     with tab1:
         st.write("### Raw Uber Ride Booking Data")
+        # Load and display raw ride booking data
         df_rides = load_csv('./data/ncr_ride_bookings.csv')
         st.write(f"**Shape:** {df_rides.shape[0]:,} rows × {df_rides.shape[1]} columns")
         st.dataframe(df_rides.head(10))
         
         st.write("### Data Characteristics")
+        # Display key metrics about the dataset
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("Total Bookings", f"{len(df_rides):,}")
@@ -102,12 +153,14 @@ def page_data_collection():
     
     with tab2:
         st.write("### Weather Data Collection")
+        # Load and display weather data
         df_weather = load_csv('./data/weather_data.csv')
         st.write(f"**Shape:** {df_weather.shape[0]:,} rows × {df_weather.shape[1]} columns")
         st.dataframe(df_weather.head(10))
         
         st.write("### Weather Variables Collected")
-        weather_vars = [col for col in df_weather.columns if any(x in col.lower() 
+        # Extract and display weather-related column names
+        weather_vars = [col for col in df_weather.columns if any(x in col.lower()
                        for x in ['temp', 'precip', 'humid', 'wind', 'pressure', 'visibility'])]
         st.write(", ".join(weather_vars[:10]))
     
@@ -121,6 +174,7 @@ def page_data_collection():
         4. Handle unmatched records appropriately
         """)
         
+        # Display merged dataset
         df_merged = load_csv('./data/rides_with_weather.csv')
         st.write(f"**Merged Dataset Shape:** {df_merged.shape[0]:,} rows × {df_merged.shape[1]} columns")
         st.dataframe(df_merged.head(10))
@@ -128,47 +182,15 @@ def page_data_collection():
         st.info(f"Successfully merged {len(df_merged):,} records with weather data")
 
 def page_ida():
+    """
+    Display the Initial Data Analysis (IDA) page with missing values analysis,
+    duplicates, statistical summaries, and preprocessing information.
+    """
     st.header("Initial Data Analysis (IDA)")
     
-    st.subheader("Data Sources Information")
-    st.write("""
-    **Uber Dataset:** https://www.kaggle.com/datasets/yashdevladdha/uber-ride-analytics-dashboard
-    
-    **Weather Data:** https://www.visualcrossing.com/
-    
-    These datasets were combined based on timestamp matching (within 30-minute windows).
-    """)
-
-    df_raw = load_csv('./data/ncr_ride_bookings.csv')
-    
-    # Missing Values Analysis
-    st.subheader("Missing Values Analysis")
-    missing_df = (
-        df_raw.isna().sum()
-        .to_frame("missing")
-        .assign(percent=lambda x: (x["missing"] / len(df_raw) * 100).round(2))
-        .sort_values("missing", ascending=False)
-        .reset_index()
-        .rename(columns={"index": "column"})
-    )
-    
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        st.dataframe(missing_df, use_container_width=True, hide_index=True)
-    with col2:
-        st.metric("Total Missing Values", f"{missing_df['missing'].sum():,}")
-        st.metric("Columns with Missing Data", len(missing_df[missing_df['missing'] > 0]))
-
-    st.subheader("Missingness Pattern Visualization")
-    sample = df_raw.sample(n=min(500, len(df_raw)), random_state=0)
-    fig, ax = plt.subplots(figsize=(12, 4))
-    sns.heatmap(sample.isna(), cbar=False, yticklabels=False, ax=ax)
-    ax.set_title("Missing Data Pattern (500 sample rows)")
-    st.pyplot(fig)
-    plt.close()
-
     # Duplicate Analysis
     st.subheader("Duplicate Records")
+    df_raw = load_csv('./data/ncr_ride_bookings.csv')
     duplicates = df_raw.duplicated().sum()
     col1, col2 = st.columns(2)
     with col1:
@@ -177,6 +199,115 @@ def page_ida():
         st.metric("Duplicate Percentage", f"{(duplicates/len(df_raw)*100):.2f}%")
     
     st.write("**Action Taken:** All duplicate records were removed during preprocessing.")
+
+    # Missing Values Analysis
+    st.subheader("Missing Values Analysis")
+
+    # Calculate missing values and percentages
+    missing_df = (
+        df_raw.isna().sum()
+        .to_frame("missing")
+        .assign(percent=lambda x: (x["missing"] / len(df_raw) * 100).round(2))
+        .sort_values("missing", ascending=False)
+        .reset_index()
+        .rename(columns={"index": "column"})
+    )
+
+    # Display missing values table and summary metrics
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.dataframe(missing_df, use_container_width=True, hide_index=True)
+    with col2:
+        st.metric("Total Missing Values", f"{missing_df['missing'].sum():,}")
+        st.metric("Columns with Missing Data", len(missing_df[missing_df['missing'] > 0]))
+
+    # Visualize missingness pattern using heatmap
+    st.subheader("Missingness Pattern Visualization")
+    sample = df_raw.sample(n=min(500, len(df_raw)), random_state=0)
+    fig, ax = plt.subplots(figsize=(12, 4))
+    sns.heatmap(sample.isna(), cbar=False, yticklabels=False, ax=ax)
+    ax.set_title("Missing Data Pattern (500 sample rows)")
+    st.pyplot(fig)
+    plt.close()
+
+    # Imputation Techniques Section
+    st.header("Missing Data Handling & Imputation Techniques")
+
+    st.write("""
+    Multiple imputation techniques were evaluated to handle missing values in the dataset.
+    """)
+
+    st.subheader("Imputation Methods Comparison")
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.markdown("""
+        **1. K-Nearest Neighbors (KNN) Imputation**
+        - Uses similarity between samples to impute missing values
+        - Considers k=5 nearest neighbors
+        - **Pros**: Preserves local patterns
+        - **Cons**: Computationally expensive for large datasets
+        
+        **2. Expectation-Maximization (EM) Algorithm**
+        - Iterative method based on maximum likelihood estimation
+        - Better suited for datasets with complex missing patterns
+        - **Pros**: Handles multivariate missingness well
+        - **Cons**: Assumes multivariate normality
+        """)
+
+    with col2:
+        st.markdown("""
+        **3. Mean/Median Imputation (Baseline)**
+        - Simple replacement with column mean or median
+        - Used as baseline for comparison
+        - **Pros**: Fast and simple
+        - **Cons**: Doesn't preserve variance or relationships
+        
+        **Performance Comparison:**
+        """)
+
+        # Create comparison table
+        comparison_data = {
+            'Method': ['Mean/Median', 'KNN (k=5)', 'EM Algorithm'],
+            'Computation Time': ['< 1 sec', '>5 min', '< 1 min'],
+        }
+
+        comparison_df = pd.DataFrame(comparison_data)
+        st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+
+    st.success("**Method Selected:** EM Algorithm was chosen as the primary imputation method due to its balance of computational efficiency and data quality preservation for this large dataset.")
+
+    # Imputation Impact Visualization
+    st.subheader("Imputation Impact Visualization")
+
+    st.write("Compare distributions before and after imputation:")
+
+    # Load data before and after imputation
+    df_imputed = load_csv('./data/rides_with_weather.csv')
+
+    selected_col = st.selectbox("Select variable to compare:", ['Avg VTAT', 'Avg CTAT'], key="impute_compare")
+
+    # Create side-by-side histograms
+    fig = make_subplots(rows=1, cols=2, subplot_titles=("Before Imputation", "After Imputation"))
+
+    # Before imputation histogram
+    fig.add_trace(
+        go.Histogram(x=df_raw[selected_col].dropna(), name="Original", marker_color='#3498db'),
+        row=1, col=1
+    )
+
+    # After imputation histogram
+    if selected_col in df_imputed.columns:
+        fig.add_trace(
+            go.Histogram(x=df_imputed[selected_col].dropna(), name="Imputed", marker_color='#2ecc71'),
+            row=1, col=2
+        )
+
+    fig.update_layout(height=400, showlegend=True, title_text=f"Distribution Comparison: {selected_col}")
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
 
     # Numeric Summary
     numeric_cols_raw = df_raw.select_dtypes(include=np.number).columns.tolist()
@@ -189,6 +320,7 @@ def page_ida():
     
     col1, col2 = st.columns([2, 1])
     with col1:
+        # Create histogram with marginal box plot
         fig_num = px.histogram(
             df_raw,
             x=num_col,
@@ -199,6 +331,7 @@ def page_ida():
         )
         st.plotly_chart(fig_num, use_container_width=True)
     with col2:
+        # Display summary statistics
         st.write("**Statistics:**")
         st.write(f"Mean: {df_raw[num_col].mean():.2f}")
         st.write(f"Median: {df_raw[num_col].median():.2f}")
@@ -210,6 +343,8 @@ def page_ida():
     cat_cols = df_raw.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
     st.subheader("Categorical Variable Frequency")
     cat_col = st.selectbox("Select a categorical column:", cat_cols, key="ida_cat")
+
+    # Display top 20 categories in bar chart
     top_counts = df_raw[cat_col].value_counts(dropna=False).head(20).reset_index()
     top_counts.columns = [cat_col, "count"]
     fig_cat = px.bar(top_counts, x=cat_col, y="count", title=f"Top 20 categories in {cat_col}")
@@ -239,6 +374,7 @@ def page_ida():
        - Validated data types
     """)
 
+    # Display preprocessed data
     df_processed = load_csv('./data/rides_with_weather.csv')
     st.write("**Preprocessed Data Preview:**")
     st.dataframe(df_processed.head(10))
@@ -254,6 +390,7 @@ def page_ida():
     col1, col2 = st.columns(2)
     
     with col1:
+        # Booking status distribution
         ride_data = load_csv("./data/ncr_ride_bookings.csv")
         fig = px.histogram(
             ride_data,
@@ -266,6 +403,7 @@ def page_ida():
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
+        # Vehicle type distribution
         vehicle_counts = ride_data['Vehicle Type'].value_counts().index.tolist()
         fig = px.histogram(
             ride_data,
@@ -286,25 +424,42 @@ def page_ida():
 
 
 def page_eda():
+    """
+    Display the Exploratory Data Analysis (EDA) page with correlation analysis,
+    temporal patterns, and weather impact visualizations.
+    """
     st.header("Exploratory Data Analysis and Visualization")
 
+    # Load processed data
     df = load_csv('./data/rides_with_weather_processed.csv')
     
     # Correlation Heatmap
     st.subheader("Correlation Heatmap")
     st.write("Interactive correlation matrix showing relationships between all numeric features.")
     
+    # Convert boolean columns to integers for correlation calculation
     bool_cols = df.select_dtypes(include='bool').columns.tolist()
     df_corr = df.copy()
     df_corr[bool_cols] = df_corr[bool_cols].astype(int)
 
     numeric_cols = df_corr.select_dtypes(include=[np.number]).columns.tolist()
-    
-    # Correlation method selector
+
+    # i want to exclude some columns that are not relevant for correlation analysis
+    exclude_cols = ['Booking Status_Cancelled by Customer',
+       'Booking Status_Cancelled by Driver', 'Booking Status_Completed',
+       'Booking Status_Incomplete', 'Booking Status_No Driver Found']
+    numeric_cols = [col for col in numeric_cols if col not in exclude_cols]
+
+    df_corr = df_corr[numeric_cols].copy()
+
+
+    # Allow user to select correlation method
     corr_method = st.radio("Select correlation method:", ["pearson", "spearman", "kendall"], horizontal=True)
     
+    # Calculate correlation matrix
     corr = df_corr[numeric_cols].corr(method=corr_method)
 
+    # Create interactive heatmap
     fig = px.imshow(
         corr,
         color_continuous_scale="RdBu_r",
@@ -320,6 +475,7 @@ def page_eda():
     st.subheader("Target Feature Correlation Analysis")
     st.write("Explore correlations of all features with a selected target variable.")
 
+    # Allow user to select target variable
     target_col = st.selectbox(
         "Select target variable:", 
         df_corr.columns, 
@@ -327,6 +483,7 @@ def page_eda():
         key="eda_target"
     )
 
+    # Calculate correlations with target variable
     df_corr[target_col] = pd.to_numeric(df_corr[target_col], errors='coerce')
     num_cols = df_corr.select_dtypes(include=[np.number]).columns
     
@@ -337,6 +494,7 @@ def page_eda():
         col1, col2 = st.columns([1, 2])
         
         with col1:
+            # Display correlation table
             st.dataframe(
                 corrs.to_frame("correlation").reset_index().rename(columns={"index": "feature"}),
                 use_container_width=True,
@@ -344,6 +502,7 @@ def page_eda():
             )
         
         with col2:
+            # Display bar chart of top correlations
             top_n = st.slider("Show top N correlations", 5, 30, 15)
             top_corrs = corrs.abs().sort_values(ascending=False).head(top_n)
             fig = px.bar(
@@ -359,13 +518,15 @@ def page_eda():
     st.subheader("Temporal Pattern Analysis")
     st.write("Analyze booking patterns across different time periods.")
     
-    # Reconstruct hour from sin/cos encoding
+    # Reconstruct hour from cyclical encoding (sin/cos)
     if 'hour_sin' in df.columns and 'hour_cos' in df.columns:
+        # Convert sin/cos back to hour using arctan2
         angle = np.arctan2(df['hour_sin'], df['hour_cos'])
         hour_float = (np.mod(angle, 2*np.pi) / (2*np.pi)) * 24
         df['hour'] = hour_float.round().astype(int) % 24
         df['hour'] = pd.Categorical(df['hour'], categories=list(range(24)), ordered=True)
 
+        # Create histogram of bookings by hour
         fig = px.histogram(
             df,
             x='hour',
@@ -382,13 +543,16 @@ def page_eda():
         st.plotly_chart(fig, use_container_width=True)
 
     # Class Balance Analysis
-    st.subheader("⚖️ Class Balance Analysis")
+    st.subheader("Class Balance Analysis")
+
+    # Load raw data and create cancellation indicator
     df_raw = load_csv('./data/rides_with_weather.csv')
     df_raw['is_cancelled'] = df_raw[['Booking Status_Cancelled by Customer', 'Booking Status_Cancelled by Driver']].any(axis=1).astype(int)
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
+        # Display cancellation metrics
         cancel_rate = df_raw['is_cancelled'].mean()
         st.metric("Cancellation Rate", f"{cancel_rate:.2%}")
         st.metric("Total Rides", f"{len(df_raw):,}")
@@ -396,6 +560,7 @@ def page_eda():
         st.metric("Completed Rides", f"{(~df_raw['is_cancelled'].astype(bool)).sum():,}")
     
     with col2:
+        # Create pie chart of booking status
         counts = df_raw['is_cancelled'].value_counts().reset_index()
         counts.columns = ['Cancelled', 'Count']
         counts['Cancelled'] = counts['Cancelled'].map({0: 'Completed', 1: 'Cancelled'})
@@ -413,11 +578,13 @@ def page_eda():
     st.subheader("Weather Impact on Cancellations")
     st.write("Explore how different weather conditions affect ride cancellation rates.")
     
+    # Prepare data for weather analysis
     df_corr = df_raw.copy()
     bool_cols = df_corr.select_dtypes(include='bool').columns
     df_corr[bool_cols] = df_corr[bool_cols].astype(int)
     num_cols = df_corr.select_dtypes(include=[np.number]).columns.tolist()
 
+    # Filter for weather-related columns
     weather_candidates = [c for c in num_cols if any(k in c.lower()
                           for k in ['temp','precip','rain','humidity','wind','pressure','visibility','snow'])]
 
@@ -427,10 +594,12 @@ def page_eda():
     with col2:
         bins = st.slider("Number of bins:", 5, 20, 10, key="eda_weather_bins")
 
+    # Calculate cancellation rate across weather bins
     df_raw[wcol] = pd.to_numeric(df_raw[wcol], errors='coerce')
     valid = df_raw[wcol].dropna()
 
     if len(valid) > 0:
+        # Create quantile-based bins
         qbins = pd.qcut(df_raw[wcol], q=bins, duplicates='drop')
         tmp = df_raw.assign(_bin=qbins).dropna(subset=['_bin'])
         rate = tmp.groupby('_bin')['is_cancelled'].mean().reset_index()
@@ -438,6 +607,7 @@ def page_eda():
         rate['bin_mid'] = rate['bin'].apply(lambda iv: iv.mid if hasattr(iv, 'mid') else np.nan)
         rate['bin_label'] = rate['bin'].astype(str)
 
+        # Create line plot of cancellation rate vs weather feature
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=rate['bin_mid'],
@@ -457,10 +627,15 @@ def page_eda():
 
 
 def page_advanced_analysis():
+    """
+    Display advanced analysis page with multi-dimensional visualizations
+    including scatter matrices, 3D plots, and distribution comparisons.
+    """
     st.header("Advanced Analysis & Visualizations")
     
     st.subheader("Multi-Dimensional Analysis")
     
+    # Load data and create cancellation indicator
     df = load_csv('./data/rides_with_weather.csv')
     df['is_cancelled'] = df[['Booking Status_Cancelled by Customer', 'Booking Status_Cancelled by Driver']].any(axis=1).astype(int)
     
@@ -469,6 +644,8 @@ def page_advanced_analysis():
     st.write("Explore relationships between multiple numeric variables simultaneously.")
     
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+
+    # Allow user to select features for scatter matrix
     selected_features = st.multiselect(
         "Select features for scatter matrix (3-5 recommended):",
         numeric_cols,
@@ -476,6 +653,7 @@ def page_advanced_analysis():
     )
     
     if len(selected_features) >= 2:
+        # Create scatter matrix with sample data (for performance)
         fig = px.scatter_matrix(
             df.sample(min(1000, len(df))),
             dimensions=selected_features,
@@ -489,6 +667,7 @@ def page_advanced_analysis():
     # 3D Scatter Plot
     st.write("### 3D Relationship Visualization")
     
+    # Allow user to select 3 variables for 3D plot
     col1, col2, col3 = st.columns(3)
     with col1:
         x_var = st.selectbox("X-axis:", numeric_cols, index=0, key="3d_x")
@@ -497,8 +676,10 @@ def page_advanced_analysis():
     with col3:
         z_var = st.selectbox("Z-axis:", numeric_cols, index=min(2, len(numeric_cols)-1), key="3d_z")
     
+    # Sample data for performance
     sample_df = df[[x_var, y_var, z_var, 'is_cancelled']].dropna().sample(min(2000, len(df)))
     
+    # Create 3D scatter plot
     fig = px.scatter_3d(
         sample_df,
         x=x_var,
@@ -514,6 +695,7 @@ def page_advanced_analysis():
     # Box plot comparison
     st.write("### Distribution Comparison by Category")
     
+    # Get categorical columns including boolean
     cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
     cat_cols_with_bool = cat_cols + ['is_cancelled']
     
@@ -523,6 +705,7 @@ def page_advanced_analysis():
     with col2:
         value = st.selectbox("Select numeric variable:", numeric_cols, key="box_val")
     
+    # Create box plot comparing distributions across categories
     fig = px.box(
         df,
         x=category,
@@ -534,93 +717,28 @@ def page_advanced_analysis():
     st.plotly_chart(fig, use_container_width=True)
 
 
-def page_imputation():
-    st.header("Missing Data Handling & Imputation Techniques")
-    
-    st.write("""
-    This section demonstrates the comparison of multiple imputation techniques used in this project.
-    """)
-    
-    st.subheader("Imputation Methods Comparison")
-    
-    st.markdown("""
-    ### Methods Implemented:
-    
-    **1. K-Nearest Neighbors (KNN) Imputation**
-    - Uses similarity between samples to impute missing values
-    - Considers k=5 nearest neighbors
-    - Pros: Preserves local patterns
-    - Cons: Computationally expensive for large datasets
-    
-    **2. Expectation-Maximization (EM) Algorithm**
-    - Iterative method based on maximum likelihood estimation
-    - Better suited for datasets with complex missing patterns
-    - Pros: Handles multivariate missingness well
-    - Cons: Assumes multivariate normality
-    
-    **3. Mean/Median Imputation (Baseline)**
-    - Simple replacement with column mean or median
-    - Used as baseline for comparison
-    - Pros: Fast and simple
-    - Cons: Doesn't preserve variance or relationships
-    """)
-    
-    # Show comparison metrics
-    st.subheader("Performance Comparison")
-    
-    comparison_data = {
-        'Method': ['Mean/Median', 'KNN (k=5)', 'EM Algorithm'],
-        'Computation Time': ['< 1 sec', '>5 min', '< 1 min'],
-    }
-    
-    comparison_df = pd.DataFrame(comparison_data)
-    st.dataframe(comparison_df, use_container_width=True, hide_index=True)
-    
-    st.info("**Method Selected:** EM Algorithm was chosen as the primary imputation method due to its balance of computational efficiency and data quality preservation for this large dataset.")
-    
-    # Visualize imputation impact
-    st.subheader("Imputation Impact Visualization")
-    
-    st.write("Comparing distributions before and after imputation:")
-    
-    df_raw = load_csv('./data/ncr_ride_bookings.csv')
-    df_imputed = load_csv('./data/rides_with_weather.csv')
-    
-    numeric_cols = df_raw.select_dtypes(include=[np.number]).columns.tolist()
-    selected_col = st.selectbox("Select variable to compare:", numeric_cols, key="impute_compare")
-    
-    fig = make_subplots(rows=1, cols=2, subplot_titles=("Before Imputation", "After Imputation"))
-    
-    fig.add_trace(
-        go.Histogram(x=df_raw[selected_col].dropna(), name="Original", marker_color='#3498db'),
-        row=1, col=1
-    )
-    
-    if selected_col in df_imputed.columns:
-        fig.add_trace(
-            go.Histogram(x=df_imputed[selected_col].dropna(), name="Imputed", marker_color='#2ecc71'),
-            row=1, col=2
-        )
-    
-    fig.update_layout(height=400, showlegend=True, title_text=f"Distribution Comparison: {selected_col}")
-    st.plotly_chart(fig, use_container_width=True)
-
-
 # ---------- Menu ----------
 def main():
+    """
+    Main function to configure the Streamlit app and handle navigation
+    between different pages.
+    """
+    # Configure page settings
     st.set_page_config(
         page_title="CMSE 830 Data Analysis Project",
         layout="wide",
         initial_sidebar_state="expanded"
     )
     
+    # Create sidebar navigation
     st.sidebar.title("Navigation")
     menu = st.sidebar.radio(
         "Select Section:",
-        ["Overview", "Data Collection", "IDA", "EDA & Visualization", "Advanced Analysis", "Imputation Techniques"],
+        ["Overview", "Data Collection", "IDA", "EDA & Visualization", "Advanced Analysis"],
         index=0
     )
     
+    # Display project information in sidebar
     st.sidebar.markdown("---")
     st.sidebar.markdown("""
     ### Project Info
@@ -628,6 +746,7 @@ def main():
     **Course:** CMSE 830  
     """)
 
+    # Route to appropriate page based on menu selection
     if menu == "Overview":
         page_overview()
     elif menu == "Data Collection":
@@ -638,8 +757,7 @@ def main():
         page_eda()
     elif menu == "Advanced Analysis":
         page_advanced_analysis()
-    elif menu == "Imputation Techniques":
-        page_imputation()
 
+# Entry point of the application
 if __name__ == "__main__":
     main()
