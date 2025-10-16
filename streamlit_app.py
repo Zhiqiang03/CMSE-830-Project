@@ -285,8 +285,8 @@ def page_ida():
 
     # Load data before and after imputation
     df_imputed = load_csv('./data/rides_with_weather.csv')
-
-    selected_col = st.selectbox("Select variable to compare:", ['Avg VTAT', 'Avg CTAT'], key="impute_compare")
+    targets = ['Avg VTAT', 'Avg CTAT', 'Driver Ratings', 'Customer Rating', 'Ride Distance', 'Booking Value']
+    selected_col = st.selectbox("Select variable to compare:", targets, key="impute_compare")
 
     # Create side-by-side histograms
     fig = make_subplots(rows=1, cols=2, subplot_titles=("Before Imputation", "After Imputation"))
