@@ -50,7 +50,7 @@ def page_overview():
     This project will explore **Do weather conditions actually impact ride-sharing behavior?** 
     And if so, how much does rain, temperature, or humidity affect whether your ride gets completed or cancelled?
     
-    ### Our Dataset of Discovery
+    ### Dataset of Discovery
     
     Collected with over **15,000 Uber ride bookings** from Delhi's National Capital Region and detailed 
     **hourly weather data** spanning all of 2024, we set out to uncover the hidden patterns. This isn't 
