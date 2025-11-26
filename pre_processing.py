@@ -1,10 +1,7 @@
 #%%
 import pandas as pd
-import numpy as np
 #%%
 df = pd.read_parquet('./data/taxi_data.parquet')
-df.head()
-#%%
 df = df[df['total_amount'] > 0] #Remove bad data (negative fares and zero fares)
 df = df[df['trip_distance'] > 0] #Remove bad data (negative distances and zero distances)
 df = df[df['payment_type'] != 2] #Remove cash payments
@@ -13,6 +10,7 @@ df = df[df['mta_tax'] >= 0] # Remove bad data (negative MTA tax)
 df = df[df['tip_amount'] >= 0] # Remove bad data (negative tips)
 df = df[df['tolls_amount'] >= 0] # Remove bad data (negative tolls)
 df = df[df['extra'] >= 0] # Remove bad data (negative extra charges)
+df.head()
 #%%
 def classify_tip(pct):
     if pct < 0.15:
@@ -33,6 +31,7 @@ df['dropoff_datetime'] = pd.to_datetime(df['dropoff_datetime'])
 
 # remove wrong datetime entries only 2024 data is kept
 df = df[(df['pickup_datetime'].dt.year == 2024)]
+df = df[(df['dropoff_datetime'].dt.year == 2024)]
 df = df[df['dropoff_datetime'] > df['pickup_datetime']]
 
 df['pickup_hour'] = df['pickup_datetime'].dt.hour
@@ -99,9 +98,74 @@ hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
 hourly_data["weather_code"] = hourly_weather_code
 
 weather_df = pd.DataFrame(data = hourly_data)
-
+weather_df['date'] = weather_df['date'].dt.tz_convert('America/New_York').dt.tz_localize(None)
 #%%
-df
+# add weather data 3/10 / 02:00:00
+miss = [{
+    'date': pd.to_datetime('2024-03-10 02:00:00'),
+    'temperature_2m': 7.1,
+    'apparent_temperature': 5,
+    'rain': 0.0,
+    'snowfall': 0.0,
+    'precipitation': 0.0,
+    'wind_speed_10m': 8.2,
+    'weather_code': 45
+},
+    {
+    'date': pd.to_datetime('2025-01-01 00:00:00'),
+    'temperature_2m': 6.8,
+    'apparent_temperature': 4.3,
+    'rain': 0.0,
+    'snowfall': 0.0,
+    'precipitation': 0.0,
+    'wind_speed_10m': 9.2,
+    'weather_code': 3
+}
+]
+
+weather_df = pd.concat([weather_df, pd.DataFrame(miss)], ignore_index=True)
+#%%
+df['weather_key'] = df['pickup_datetime'].dt.round('h')
+
+df = pd.merge(
+    df,
+    weather_df,
+    left_on='weather_key',
+    right_on='date',
+    how='left'
+)
+
+df = df.drop(columns=['weather_key', 'date'])
+#%%
+df[df['temperature_2m'].isna()]
 #%%
 df['Airport_fee'] = df['Airport_fee'].fillna(0)
 df['congestion_surcharge'] = df['congestion_surcharge'].fillna(0)
+#%%
+df['speed_mph'] = (df['trip_distance'] / (df['duration_min'] + 0.001)) * 60
+
+#remove unrealistic speeds
+df = df[df['speed_mph'] <= 100]
+#%%
+cols_to_drop = [
+    'store_and_fwd_flag',
+    'vendor_id',
+    'payment_type',
+    'pickup_datetime',
+    'dropoff_datetime',
+    'temperature_2m',
+    'rain',
+    'VendorID',
+    'ehail_fee',
+    'trip_type'
+]
+#%%
+df.drop(columns=cols_to_drop, inplace=True, errors='ignore')
+#%%
+df.columns
+#%%
+#is there any missing data left?
+print(df.isna().sum())
+#%%
+df.to_parquet('./data/taxi_data_preprocessed_missing.parquet', index=False)
+#%%
