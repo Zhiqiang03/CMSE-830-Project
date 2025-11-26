@@ -1,12 +1,14 @@
 # Uber Ride Analytics & Weather Impact Analysis
 
+https://catalog.data.gov/dataset/taxi-trips
+
 A comprehensive data analysis project examining the relationship between Uber ride bookings and weather conditions in Delhi, India. This project demonstrates data collection, preprocessing, exploratory data analysis, and interactive visualization using Streamlit.
 
 **Author:** Zhiqiang Ni  
 **Course:** CMSE 830 - Foundations of Data Science  
 **Institution:** Michigan State University
 
-**Live Demo:** https://cmse-830-project-ni.streamlit.app/
+**Live Demo:** https://cmse-830-project-ni.streamlit.app/[yellow_tripdata_2025-01.parquet](../../../../../Downloads/yellow_tripdata_2025-01.parquet)
 
 - **Uber Dataset:** [Kaggle - Uber Ride Analytics Dashboard](https://www.kaggle.com/datasets/yashdevladdha/uber-ride-analytics-dashboard)
   - ~15,000 ride bookings from 2024
