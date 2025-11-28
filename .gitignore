@@ -1,4 +1,4 @@
-./data/taxi_data.parquet
-./data/taxi_data_preprocessed.parquet
-./data/taxi_data_preprocessed_missing.parquet
+data/taxi_data.parquet
+data/taxi_data_preprocessed.parquet
+data/taxi_data_preprocessed_missing.parquet
 
