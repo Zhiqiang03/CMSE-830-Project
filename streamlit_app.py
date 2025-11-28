@@ -834,42 +834,32 @@ def page_advanced_analysis():
         st.plotly_chart(fig, width='stretch')
 
     with col2:
-        st.write("**Correlation Heatmap**")
+        st.write("**Fare vs Tip Percentage Analysis**")
 
-        # Select key features for correlation
-        key_features = ['tip_percentage', 'fare_amount', 'trip_distance', 'duration_min',
-                       'pickup_hour', 'passenger_count']
-        available_features = [f for f in key_features if f in df.columns]
+        # Create scatter plot with trend analysis
+        sample_df = df[['fare_amount', 'tip_percentage', 'trip_distance']].dropna()
+        sample_df = sample_df[(sample_df['fare_amount'] <= 100) & (sample_df['tip_percentage'] <= 50)]
+        sample_df = sample_df.sample(min(5000, len(sample_df)), random_state=42)
 
-        if len(available_features) >= 2:
-            corr_matrix = df[available_features].corr()
+        fig = px.scatter(
+            sample_df,
+            x='fare_amount',
+            y='tip_percentage',
+            color='trip_distance',
+            title="Fare Amount vs Tip Percentage",
+            labels={'fare_amount': 'Fare ($)', 'tip_percentage': 'Tip %', 'trip_distance': 'Distance (mi)'},
+            opacity=0.6,
+            color_continuous_scale='Viridis'
+        )
 
-            fig = px.imshow(
-                corr_matrix,
-                title="Feature Correlation with Tip Percentage",
-                color_continuous_scale='RdBu_r',
-                aspect='auto',
-                text_auto='.2f'
-            )
-            st.plotly_chart(fig, width='stretch')
+        # Add trend line
+        z = np.polyfit(sample_df['fare_amount'], sample_df['tip_percentage'], 1)
+        p = np.poly1d(z)
+        x_trend = np.linspace(sample_df['fare_amount'].min(), sample_df['fare_amount'].max(), 100)
+        fig.add_trace(go.Scatter(x=x_trend, y=p(x_trend), mode='lines',
+                                 name='Trend', line=dict(color='red', width=2)))
 
-    st.markdown("---")
-
-    # Key insights
-    st.subheader("Key Insights")
-
-    st.markdown("""
-    **What we learned about tipping behavior:**
-    
-    - **Time matters**: Tips vary significantly by hour and day of the week
-    - **Trip length**: Longer trips don't always mean higher tip percentages
-    - **Fare amount**: There's often an inverse relationship - higher fares may get lower tip %
-    - **Weather impact**: Comfortable conditions correlate with better tipping
-    - **Group size**: Multiple passengers often tip more generously
-    - **Taxi type**: Yellow and green taxis show different tipping patterns
-    
-    These insights can help drivers optimize their earnings and understand passenger behavior better.
-    """)
+        st.plotly_chart(fig, width='stretch')
 
 
 @st.cache_data
@@ -890,16 +880,16 @@ def get_hardcoded_model_results():
     """
     model_results = {
         'Logistic Regression': {
-            'Accuracy': 0.4592,
-            'Precision': 0.6263,
-            'Recall': 0.4592,
-            'F1-Score': 0.4990,
-            'Training Time (s)': 45.77,
-            'Prediction Time (s)': 0.08,
+            'Accuracy': 0.4596,
+            'Precision': 0.6260,
+            'Recall': 0.4596,
+            'F1-Score': 0.4992,
+            'Training Time (s)': 104.74,
+            'Prediction Time (s)': 0.13,
             'confusion_matrix': np.array([
-                [41460, 40166, 34860],
-                [8922, 96676, 84847],
-                [1521, 18159, 21925]
+                [41484, 40241, 34761],
+                [8968, 96810, 84667],
+                [1532, 18186, 21887]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
@@ -913,45 +903,45 @@ weighted avg       0.63      0.46      0.50    348536""",
             'model': None
         },
         'Random Forest': {
-            'Accuracy': 0.5711,
-            'Precision': 0.6373,
-            'Recall': 0.5711,
-            'F1-Score': 0.5651,
-            'Training Time (s)': 70.66,
-            'Prediction Time (s)': 1.25,
+            'Accuracy': 0.5432,
+            'Precision': 0.6354,
+            'Recall': 0.5432,
+            'F1-Score': 0.5522,
+            'Training Time (s)': 84.49,
+            'Prediction Time (s)': 1.00,
             'confusion_matrix': np.array([
-                [40872, 61887, 13727],
-                [6685, 147899, 35861],
-                [1256, 30056, 10293]
+                [41092, 56763, 18631],
+                [7049, 134548, 48848],
+                [1265, 26663, 13677]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.84      0.35      0.49    116486
-      Middle       0.62      0.78      0.69    190445
-        High       0.17      0.25      0.20     41605
+         Low       0.83      0.35      0.50    116486
+      Middle       0.62      0.71      0.66    190445
+        High       0.17      0.33      0.22     41605
 
-    accuracy                           0.57    348536
+    accuracy                           0.54    348536
    macro avg       0.54      0.46      0.46    348536
-weighted avg       0.64      0.57      0.57    348536""",
+weighted avg       0.64      0.54      0.55    348536""",
             'model': None
         },
         'Hist Gradient Boosting': {
-            'Accuracy': 0.4766,
-            'Precision': 0.6308,
-            'Recall': 0.4766,
-            'F1-Score': 0.5128,
-            'Training Time (s)': 38.66,
-            'Prediction Time (s)': 3.41,
+            'Accuracy': 0.4753,
+            'Precision': 0.6306,
+            'Recall': 0.4753,
+            'F1-Score': 0.5120,
+            'Training Time (s)': 67.00,
+            'Prediction Time (s)': 3.06,
             'confusion_matrix': np.array([
-                [42170, 42285, 32031],
-                [8762, 102522, 79161],
-                [1477, 18720, 21408]
+                [42222, 41842, 32422],
+                [8840, 101916, 79689],
+                [1525, 18561, 21519]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
          Low       0.80      0.36      0.50    116486
       Middle       0.63      0.54      0.58    190445
-        High       0.16      0.51      0.25     41605
+        High       0.16      0.52      0.25     41605
 
     accuracy                           0.48    348536
    macro avg       0.53      0.47      0.44    348536
@@ -959,39 +949,39 @@ weighted avg       0.63      0.48      0.51    348536""",
             'model': None
         },
         'Decision Tree': {
-            'Accuracy': 0.4672,
-            'Precision': 0.5929,
-            'Recall': 0.4672,
-            'F1-Score': 0.5018,
-            'Training Time (s)': 27.11,
-            'Prediction Time (s)': 0.07,
+            'Accuracy': 0.4719,
+            'Precision': 0.5817,
+            'Recall': 0.4719,
+            'F1-Score': 0.5040,
+            'Training Time (s)': 26.07,
+            'Prediction Time (s)': 0.06,
             'confusion_matrix': np.array([
-                [43409, 42646, 30431],
-                [14440, 100978, 75027],
-                [3122, 20030, 18453]
+                [44717, 43079, 28690],
+                [17410, 102437, 70598],
+                [3743, 20552, 17310]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.71      0.37      0.49    116486
-      Middle       0.62      0.53      0.57    190445
-        High       0.15      0.44      0.22     41605
+         Low       0.68      0.38      0.49    116486
+      Middle       0.62      0.54      0.57    190445
+        High       0.15      0.42      0.22     41605
 
     accuracy                           0.47    348536
-   macro avg       0.49      0.45      0.43    348536
-weighted avg       0.59      0.47      0.50    348536""",
+   macro avg       0.48      0.45      0.43    348536
+weighted avg       0.58      0.47      0.50    348536""",
             'model': None
         },
         'K-Nearest Neighbors': {
-            'Accuracy': 0.5686,
-            'Precision': 0.5209,
-            'Recall': 0.5686,
-            'F1-Score': 0.5351,
-            'Training Time (s)': 0.05,
-            'Prediction Time (s)': 288.98,
+            'Accuracy': 0.5683,
+            'Precision': 0.5206,
+            'Recall': 0.5683,
+            'F1-Score': 0.5348,
+            'Training Time (s)': 0.07,
+            'Prediction Time (s)': 422.42,
             'confusion_matrix': np.array([
-                [55584, 59335, 1567],
-                [45148, 141598, 3699],
-                [9628, 30982, 995]
+                [55570, 59367, 1549],
+                [45236, 141532, 3677],
+                [9671, 30950, 984]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
@@ -1001,53 +991,53 @@ weighted avg       0.59      0.47      0.50    348536""",
 
     accuracy                           0.57    348536
    macro avg       0.42      0.41      0.40    348536
-weighted avg       0.52      0.57      0.54    348536""",
+weighted avg       0.52      0.57      0.53    348536""",
             'model': None
         },
         'Naive Bayes': {
-            'Accuracy': 0.6216,
-            'Precision': 0.6169,
-            'Recall': 0.6216,
-            'F1-Score': 0.5745,
-            'Training Time (s)': 0.35,
-            'Prediction Time (s)': 0.13,
+            'Accuracy': 0.2265,
+            'Precision': 0.3863,
+            'Recall': 0.2265,
+            'F1-Score': 0.1871,
+            'Training Time (s)': 0.69,
+            'Prediction Time (s)': 0.23,
             'confusion_matrix': np.array([
-                [41916, 70816, 3754],
-                [9599, 172480, 8366],
-                [1840, 37513, 2252]
+                [37845, 18, 78623],
+                [4410, 3, 186032],
+                [511, 1, 41093]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.79      0.36      0.49    116486
-      Middle       0.61      0.91      0.73    190445
-        High       0.16      0.05      0.08     41605
+         Low       0.88      0.32      0.48    116486
+      Middle       0.14      0.00      0.00    190445
+        High       0.13      0.99      0.24     41605
 
-    accuracy                           0.62    348536
-   macro avg       0.52      0.44      0.44    348536
-weighted avg       0.62      0.62      0.57    348536""",
+    accuracy                           0.23    348536
+   macro avg       0.39      0.44      0.24    348536
+weighted avg       0.39      0.23      0.19    348536""",
             'model': None
         },
         'SVM (Linear SGD)': {
-            'Accuracy': 0.6323,
-            'Precision': 0.6125,
-            'Recall': 0.6323,
-            'F1-Score': 0.5725,
-            'Training Time (s)': 3.90,
-            'Prediction Time (s)': 0.02,
+            'Accuracy': 0.6342,
+            'Precision': 0.6186,
+            'Recall': 0.6342,
+            'F1-Score': 0.5724,
+            'Training Time (s)': 6.16,
+            'Prediction Time (s)': 0.03,
             'confusion_matrix': np.array([
-                [42268, 73110, 1108],
-                [10924, 177358, 2163],
-                [2215, 38637, 753]
+                [41423, 74045, 1018],
+                [9549, 178932, 1964],
+                [1909, 39022, 674]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.76      0.36      0.49    116486
-      Middle       0.61      0.93      0.74    190445
-        High       0.19      0.02      0.03     41605
+         Low       0.78      0.36      0.49    116486
+      Middle       0.61      0.94      0.74    190445
+        High       0.18      0.02      0.03     41605
 
     accuracy                           0.63    348536
-   macro avg       0.52      0.44      0.42    348536
-weighted avg       0.61      0.63      0.57    348536""",
+   macro avg       0.53      0.44      0.42    348536
+weighted avg       0.62      0.63      0.57    348536""",
             'model': None
         }
     }
