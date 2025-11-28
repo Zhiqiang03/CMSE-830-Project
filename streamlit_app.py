@@ -1099,7 +1099,7 @@ def page_model_evaluation():
     # Display metrics table
     st.dataframe(
         comparison_df.style.highlight_max(axis=0, color='lightgreen'),
-        use_container_width=True
+        width='stretch'
     )
 
     # Visualize comparison
@@ -1119,7 +1119,7 @@ def page_model_evaluation():
         color_continuous_scale='viridis'
     )
     fig.update_layout(xaxis_tickangle=-45, height=500)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     st.markdown("---")
 
@@ -1156,7 +1156,7 @@ def page_model_evaluation():
                 title=f"Confusion Matrix: {selected_model}"
             )
             fig.update_layout(height=500)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         # Classification Report
         if model_data['classification_report']:
