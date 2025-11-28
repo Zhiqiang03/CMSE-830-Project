@@ -8,6 +8,13 @@ from plotly.subplots import make_subplots
 import pickle
 from pathlib import Path
 
+# Configure page settings at the top
+st.set_page_config(
+    page_title="CMSE 830 Data Analysis Project",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Centralized data paths for easy updates
 DATA_DIR = "./data"
 MODEL_DIR = "./models"
@@ -15,6 +22,23 @@ TAXI_SAMPLE = f"{DATA_DIR}/taxi_data_sampled.parquet"
 TAXI_PREPROCESSED_MISSING_SAMPLED = f"{DATA_DIR}/taxi_data_preprocessed_missing_sampled.parquet"
 TAXI_PREPROCESSED_SAMPLED = f"{DATA_DIR}/taxi_data_preprocessed.parquet"
 TAXI_PREPROCESSED_TIP_SAMPLED = f"{DATA_DIR}/taxi_data_preprocessed_tip.parquet"
+
+# Custom CSS for better styling
+st.markdown("""
+<style>
+.main-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #1f77b4;
+}
+.metric-card {
+    background-color: #f0f2f6;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+""", unsafe_allow_html=True)
 
 def page_overview():
     """
@@ -31,8 +55,7 @@ def page_overview():
     - **Missing Data Handling** using iterative imputation
     - **Predictive Modeling** for tip classification
 
-    **Author:** Zhiqiang Ni
-    **Course:** CMSE 830
+    **Author:** Zhiqiang Ni | **Course:** CMSE 830
     """)
     
     # Key metrics
@@ -40,60 +63,26 @@ def page_overview():
     st.subheader("Project Highlights")
 
     col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.markdown("""
-        <div class="metric-card">
-        <h3>3</h3>
-        <p>Data Sources</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="metric-card">
-        <h3>7</h3>
-        <p>ML Models</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        st.markdown("""
-        <div class="metric-card">
-        <h3>15+</h3>
-        <p>Visualizations</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col4:
-        st.markdown("""
-        <div class="metric-card">
-        <h3>1M+</h3>
-        <p>Records Analyzed</p>
-        </div>
-        """, unsafe_allow_html=True)
+    col1.metric("Data Sources", "3")
+    col2.metric("ML Models", "7")
+    col3.metric("Visualizations", "15+")
+    col4.metric("Records Analyzed", "1M+")
 
     st.markdown("---")
 
     st.header("The Story Behind the Data")
     st.write("""
-    New York City's iconic yellow and green taxis are a vital part of its transportation network, generating a massive amount of data with every trip. This project dives into this data to uncover the factors that influence whether a passenger leaves a good tip.
+    New York City's iconic yellow and green taxis generate massive amounts of data with every trip. 
+    This project analyzes this data to uncover the factors that influence passenger tipping behavior.
 
-    Is tipping behavior influenced by the time of day, the length of the trip, or even the weather? By combining trip data from the NYC Taxi & Limousine Commission (TLC) with historical weather data, we can explore these questions and build models to predict tip amounts.
-    
-    ### Dataset of Discovery
-    
-    This analysis is based on **2024 taxi trip records** for both yellow and green taxis, along with **hourly weather data** for NYC. We explore:
-    - **Tipping Patterns**: What are the characteristics of trips with high, middle, and low tips?
-    - **Temporal Trends**: How do tip amounts vary by hour, day of the week, or month?
-    - **Weather's Impact**: Does rain, snow, or temperature affect a passenger's generosity?
-    - **Predictive Insights**: Can we build reliable models to predict the tip class of a future trip?
+    By combining 2024 taxi trip records from the NYC Taxi & Limousine Commission (TLC) with hourly weather data, 
+    we explore tipping patterns, temporal trends, and build models to predict tip amounts.
     
     ### Why This Matters
     
     Understanding tipping behavior provides valuable insights for:
     - **Drivers**: To better understand potential earnings and influencing factors
-    - **Passengers**: To gain awareness of tipping norms and how their trips compare
+    - **Passengers**: To gain awareness of tipping norms
     - **TLC**: For policy-making and understanding the taxi economy
     """)
 
@@ -106,84 +95,36 @@ def page_overview():
 
     with col1:
         st.markdown("""
-        #### 1. Data Collection & Integration
+        #### Data Collection & Integration
         - NYC Yellow Taxi Data (2024)
         - NYC Green Taxi Data (2024)
         - Historical Weather Data (Open-Meteo API)
-        
-        #### 2. Data Preprocessing
-        - Data cleaning and validation
+        - Data cleaning, validation, and feature engineering
         - Missing value imputation (Iterative MICE)
-        - Feature engineering (15+ new features)
         
-        #### 3. Exploratory Data Analysis
+        #### Analysis & Visualization
         - 15+ interactive visualizations
-        - Statistical analysis
-        - Correlation analysis
-        - Pattern identification
+        - Statistical and correlation analysis
+        - Temporal and weather pattern analysis
         """)
 
     with col2:
         st.markdown("""
-        #### 4. Machine Learning Models
-        - 7 different algorithms implemented
+        #### Machine Learning
+        - 7 different algorithms with class balancing
         - Comprehensive model comparison
         - Feature importance analysis
         
-        #### 5. Interactive Features
-        - Real-time tip prediction
-        - Model comparison tools
+        #### Interactive Features
+        - Real-time tip prediction interface
         - Dynamic visualizations
-        
-        #### 6. Complete Documentation
-        - Methodology explanation
-        - Technical stack overview
-        - User guide
-        """)
-
-    st.markdown("---")
-
-    st.subheader("Techniques Used")
-
-    tab1, tab2, tab3 = st.tabs(["Data Preparation", "Analysis Methods", "Advanced Features"])
-
-    with tab1:
-        st.markdown("""
-        **Data Preparation:**
-        - Data downloading and merging (Yellow and Green taxis)
-        - Data cleaning and feature engineering
-        - Merging with weather data via temporal joins
-        - Iterative imputation for missing values
-        - Train-test splitting with stratification
-        """)
-
-    with tab2:
-        st.markdown("""
-        **Analysis Methods:**
-        - Correlation analysis
-        - Interactive visualizations (15+ types)
-        - Temporal pattern analysis
-        - Distribution analysis
-        - Statistical hypothesis testing
-        - Feature importance evaluation
-        """)
-
-    with tab3:
-        st.markdown("""
-        **Advanced Features:**
-        - 7 ML models with hyperparameter tuning
-        - Ensemble methods (Random Forest, Gradient Boosting)
-        - Class balancing for imbalanced data
-        - Caching strategies for performance
-        - Session state management
-        - Interactive prediction interface
+        - Complete methodology documentation
         """)
 
     st.markdown("---")
 
     st.info("""
     **Navigation Guide:** Use the sidebar menu to explore different sections of this comprehensive analysis.
-    Each section demonstrates different data science techniques and insights.
     """)
 
 
@@ -207,66 +148,54 @@ def page_data_collection():
     """
     st.header("Data Collection and Preparation")
 
-    st.write("""
-    This project uses two main data sources to analyze tipping behavior in NYC taxis:
-    """)
-
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("""
         **NYC TLC Trip Record Data**
-        - **Source**: [NYC Taxi & Limousine Commission](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
-        - **Records**: Yellow and Green taxi trips for 2024
-        - **Key Features**: Pickup/dropoff times, locations, fares, tolls, tip amounts
+        - Yellow and Green taxi trips for 2024
+        - Key Features: Pickup/dropoff times, locations, fares, tips
+        - Source: [NYC TLC](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
         """)
 
     with col2:
         st.markdown("""
         **Weather Data**
-        - **Source**: [Open-Meteo API](https://open-meteo.com/)
-        - **Coverage**: 2024
-        - **Location**: NYC
-        - **Granularity**: Hourly observations
-        - **Key Features**: Temperature, precipitation, wind speed, etc.
+        - Hourly observations for NYC (2024)
+        - Key Features: Temperature, precipitation, wind speed
+        - Source: [Open-Meteo API](https://open-meteo.com/)
         """)
 
-    st.info("The taxi trip data was merged with weather data based on the pickup timestamp.")
+    st.info("Taxi trip data was merged with weather data based on pickup timestamp.")
 
     st.markdown("---")
 
-    st.subheader("Detailed Data Exploration")
+    st.subheader("Data Exploration")
 
-    tab1, tab2, tab3 = st.tabs(["Raw Taxi Data", "Preprocessed Data", "Imputed Data"])
+    tab1, tab2, tab3 = st.tabs(["Raw Data", "Preprocessed Data", "Imputed Data"])
 
     with tab1:
-        st.write("### Raw Taxi Data (Yellow and Green Taxis)")
         df_raw = load_parquet(TAXI_SAMPLE)
         st.write(f"**Shape:** {df_raw.shape[0]:,} rows × {df_raw.shape[1]} columns")
-        st.dataframe(df_raw.head(10))
 
-        st.write("### Data Characteristics")
         col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total Trips", f"{len(df_raw):,}")
-        with col2:
-            st.metric("Time Period", "2024")
-        with col3:
-            st.metric("Taxi Types", "Yellow & Green")
+        col1.metric("Total Trips", f"{len(df_raw):,}")
+        col2.metric("Time Period", "2024")
+        col3.metric("Taxi Types", "Yellow & Green")
+
+        st.dataframe(df_raw.head(10), width='stretch')
 
     with tab2:
-        st.write("### Preprocessed Data")
         df_preprocessed = load_parquet(TAXI_PREPROCESSED_MISSING_SAMPLED)
         st.write(f"**Shape:** {df_preprocessed.shape[0]:,} rows × {df_preprocessed.shape[1]} columns")
-        st.dataframe(df_preprocessed.head(10))
-        st.write("This data has been cleaned, merged with weather data, and new features have been engineered.")
+        st.dataframe(df_preprocessed.head(10), width='stretch')
+        st.caption("Cleaned, merged with weather data, with engineered features.")
 
     with tab3:
-        st.write("### Imputed Data")
         df_imputed = load_parquet(TAXI_PREPROCESSED_SAMPLED)
         st.write(f"**Shape:** {df_imputed.shape[0]:,} rows × {df_imputed.shape[1]} columns")
-        st.dataframe(df_imputed.head(10))
-        st.write("Missing values in the preprocessed data have been filled using iterative imputation.")
+        st.dataframe(df_imputed.head(10), width='stretch')
+        st.caption("Missing values filled using iterative imputation.")
 
 @st.cache_data
 def compute_missing_values(df):
@@ -321,22 +250,20 @@ def page_ida():
         st.metric("Total Missing Values", f"{missing_df['missing'].sum():,}")
         st.metric("Columns with Missing Data", len(missing_df))
 
-    st.subheader("Missing Data Handling")
-    st.write("""
-    Missing values in the dataset were handled using `IterativeImputer` from scikit-learn. 
-    This method models each feature with missing values as a function of other features, and uses that estimate for imputation. 
-    It is more sophisticated than simple mean/median imputation and can preserve relationships between variables.
+    st.info("""
+    **Imputation Method:** `IterativeImputer` (MICE) models each feature with missing values 
+    as a function of other features, preserving relationships between variables.
     """)
 
+    # Imputation Impact Visualization
     st.subheader("Imputation Impact Visualization")
 
-    impute_cols = [
-        'passenger_count', 'RatecodeID'
-    ]
+    impute_cols = ['passenger_count', 'RatecodeID']
+    selected_col = st.selectbox("Select variable to compare:",
+                                [c for c in impute_cols if c in df_preprocessed.columns],
+                                key="impute_compare")
 
-    selected_col = st.selectbox("Select variable to compare:", [c for c in impute_cols if c in df_preprocessed.columns], key="impute_compare")
-
-    # Sample data for histogram to improve performance
+    # Sample data for performance
     sample_size = min(10000, len(df_preprocessed))
     df_preprocessed_sample = df_preprocessed.sample(n=sample_size, random_state=42)
     df_imputed_sample = df_imputed.sample(n=sample_size, random_state=42)
@@ -344,13 +271,15 @@ def page_ida():
     fig = make_subplots(rows=1, cols=2, subplot_titles=("Before Imputation", "After Imputation"))
 
     fig.add_trace(
-        go.Histogram(x=df_preprocessed_sample[selected_col].dropna(), name="Original", marker_color='#3498db', nbinsx=30),
+        go.Histogram(x=df_preprocessed_sample[selected_col].dropna(), name="Original",
+                    marker_color='#3498db', nbinsx=30),
         row=1, col=1
     )
 
     if selected_col in df_imputed_sample.columns:
         fig.add_trace(
-            go.Histogram(x=df_imputed_sample[selected_col].dropna(), name="Imputed", marker_color='#2ecc71', nbinsx=30),
+            go.Histogram(x=df_imputed_sample[selected_col].dropna(), name="Imputed",
+                        marker_color='#2ecc71', nbinsx=30),
             row=1, col=2
         )
 
@@ -359,20 +288,22 @@ def page_ida():
 
     st.markdown("---")
 
+    # Statistical Summary
     numeric_cols = df_imputed.select_dtypes(include=np.number).columns.tolist()
-    st.subheader("Statistical Summary (Numeric Variables)")
+    st.subheader("Statistical Summary")
+
     stats_summary = compute_stats_summary(df_imputed)
     st.dataframe(stats_summary, width='stretch')
 
+    # Interactive Distribution Analysis
     st.subheader("Interactive Distribution Analysis")
     num_col = st.selectbox("Select a numeric column to explore:", numeric_cols, key="ida_num")
 
-    # Get cached statistics
     stats = get_column_stats(df_imputed, num_col)
 
     col1, col2 = st.columns([2, 1])
     with col1:
-        # Sample for visualization to improve performance
+        # Sample for visualization
         sample_size_viz = min(20000, len(df_imputed))
         df_sample = df_imputed[[num_col]].sample(n=sample_size_viz, random_state=42)
 
@@ -387,12 +318,11 @@ def page_ida():
         st.plotly_chart(fig_num, width='stretch')
     with col2:
         st.write("**Statistics:**")
-        st.write(f"Mean: {stats['mean']:.2f}")
-        st.write(f"Median: {stats['median']:.2f}")
-        st.write(f"Std Dev: {stats['std']:.2f}")
-        st.write(f"Min: {stats['min']:.2f}")
-        st.write(f"Max: {stats['max']:.2f}")
+        st.metric("Mean", f"{stats['mean']:.2f}")
+        st.metric("Median", f"{stats['median']:.2f}")
+        st.metric("Std Dev", f"{stats['std']:.2f}")
 
+    # Categorical Analysis
     cat_cols = df_imputed.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
 
     if cat_cols:
@@ -402,34 +332,28 @@ def page_ida():
         if cat_col:
             top_counts = df_imputed[cat_col].value_counts(dropna=False).head(20).reset_index()
             top_counts.columns = [cat_col, "count"]
-            fig_cat = px.bar(top_counts, x=cat_col, y="count", title=f"Top 20 categories in {cat_col}")
+            fig_cat = px.bar(top_counts, x=cat_col, y="count",
+                           title=f"Top 20 categories in {cat_col}")
             st.plotly_chart(fig_cat, width='stretch')
-    else:
-        st.info("No categorical columns available in the imputed dataset.")
 
-    st.header("Data Preprocessing & Feature Engineering")
+    st.markdown("---")
 
-    st.subheader("Techniques Applied:")
+    # Feature Engineering Summary
+    st.subheader("Feature Engineering")
+
     st.markdown("""
-    1. **Data Cleaning:**
-       - Removed trips with negative or zero fare, distance, and duration.
-       - Handled outliers and invalid data points.
-    
-    2. **Feature Engineering:**
-       - `duration_min`: Trip duration in minutes.
-       - `speed_mph`: Average speed of the trip.
-       - `tip_class`: Categorical variable for tip amount ('Low', 'Middle', 'High').
-    
-    3. **Data Integration:**
-       - Merged taxi data with hourly weather data based on pickup time.
+    **Key Transformations:**
+    - Removed trips with invalid values (negative/zero fare, distance, duration)
+    - Created `duration_min`, `speed_mph`, and `tip_class` features
+    - Merged with hourly weather data based on pickup time
     """)
 
-    st.subheader("Data Types Overview")
-    dtype_df = pd.DataFrame(df_imputed.dtypes, columns=["Data Type"]).reset_index()
-    dtype_df.columns = ["Column", "Data Type"]
-    # Convert to string explicitly to avoid Arrow serialization issues
-    dtype_df["Data Type"] = dtype_df["Data Type"].apply(lambda x: str(x))
-    st.dataframe(dtype_df, width='stretch', hide_index=True)
+    # Data Types Overview
+    with st.expander("View Data Types"):
+        dtype_df = pd.DataFrame(df_imputed.dtypes, columns=["Data Type"]).reset_index()
+        dtype_df.columns = ["Column", "Data Type"]
+        dtype_df["Data Type"] = dtype_df["Data Type"].apply(str)
+        st.dataframe(dtype_df, width='stretch', hide_index=True)
 
 
 def page_eda():
@@ -437,47 +361,41 @@ def page_eda():
     Display the Exploratory Data Analysis (EDA) page with correlation analysis,
     temporal patterns, and weather impact visualizations.
     """
-    st.header("Exploratory Data Analysis and Visualization")
+    st.header("Exploratory Data Analysis")
 
     df = load_parquet(TAXI_PREPROCESSED_SAMPLED)
 
-    st.subheader("Correlation Heatmap")
-    st.write("Interactive correlation matrix showing relationships between all numeric features.")
-    st.info("**tip_class** (0=Low, 1=Middle, 2=High) is our target variable for classification.")
+    st.subheader("Correlation Analysis")
+    st.caption("tip_class (0=Low, 1=Middle, 2=High) is our target variable")
 
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
-    # Reorder columns to put tip_class first (top of heatmap)
+    # Reorder columns to put tip_class first
     if 'tip_class' in numeric_cols:
         numeric_cols.remove('tip_class')
         numeric_cols = numeric_cols + ['tip_class']
 
-    corr_method = st.radio("Select correlation method:", ["pearson", "spearman", "kendall"], horizontal=True)
-    
+    corr_method = st.radio("Correlation method:", ["pearson", "spearman", "kendall"], horizontal=True)
+
     corr = df[numeric_cols].corr(method=corr_method)
 
     fig = px.imshow(
         corr,
         color_continuous_scale="RdBu_r",
         zmin=-1, zmax=1,
-        origin="lower",
-        title=f"Correlation Heatmap ({corr_method.capitalize()}) - tip_class at top",
+        title=f"Correlation Heatmap ({corr_method.capitalize()})",
         aspect="auto"
     )
-    fig.update_layout(height=700, xaxis_title="", yaxis_title="")
+    fig.update_layout(height=700)
     st.plotly_chart(fig, width='stretch')
 
-    st.subheader("Target Feature Correlation Analysis")
-    st.write("Explore correlations of all features with a selected target variable.")
+    st.markdown("---")
 
-    # Default to tip_class if available, otherwise first column
+    # Target Feature Correlation
+    st.subheader("Feature Importance via Correlation")
+
     default_idx = numeric_cols.index("tip_class") if "tip_class" in numeric_cols else 0
-    target_col = st.selectbox(
-        "Select target variable:", 
-        numeric_cols,
-        index=default_idx,
-        key="eda_target"
-    )
+    target_col = st.selectbox("Target variable:", numeric_cols, index=default_idx, key="eda_target")
 
     corrs = df[numeric_cols].corr(method='pearson')[target_col].sort_values(ascending=False)
 
@@ -502,36 +420,35 @@ def page_eda():
         )
         st.plotly_chart(fig, width='stretch')
 
-    st.subheader("Temporal Pattern Analysis")
-    st.write("Analyze tipping patterns across different time periods.")
+    st.markdown("---")
+
+    # Temporal Patterns
+    st.subheader("Temporal Patterns")
 
     if 'pickup_hour' in df.columns:
         fig = px.histogram(
             df,
             x='pickup_hour',
-            y='fare_amount',  # Using fare_amount since tip_amount may not exist
+            y='fare_amount',
             histfunc='avg',
             nbins=24,
-            title="Average Fare Amount by Hour of Day",
-            labels={'pickup_hour': 'Hour of Day', 'fare_amount': 'Average Fare Amount'}
+            title="Average Fare by Hour of Day",
+            labels={'pickup_hour': 'Hour', 'fare_amount': 'Avg Fare ($)'}
         )
         st.plotly_chart(fig, width='stretch')
 
-    st.subheader("Tip Class Balance Analysis")
-    st.write("Distribution of tip classes in the dataset (0=Low, 1=Middle, 2=High)")
+    # Tip Class Distribution
+    st.subheader("Tip Class Distribution")
 
     col1, col2 = st.columns([1, 2])
     
     with col1:
         tip_class_counts = df['tip_class'].value_counts().sort_index()
-        # Map numeric values to labels for display
-        tip_labels = {0: 'Low', 1: 'Middle', 2: 'High'}
         st.metric("Low Tips (0)", f"{tip_class_counts.get(0, 0):,}")
         st.metric("Middle Tips (1)", f"{tip_class_counts.get(1, 0):,}")
         st.metric("High Tips (2)", f"{tip_class_counts.get(2, 0):,}")
 
     with col2:
-        # Create labels for the pie chart
         tip_labels = {0: 'Low', 1: 'Middle', 2: 'High'}
         plot_data = pd.DataFrame({
             'Tip Class': [tip_labels.get(i, i) for i in tip_class_counts.index],
@@ -547,43 +464,34 @@ def page_eda():
         )
         st.plotly_chart(fig, width='stretch')
 
-    st.subheader("Weather Impact on Tips")
-    st.write("Explore how different weather conditions affect tip amounts.")
+    st.markdown("---")
 
-    # Load preprocessed data with tip information
+    # Weather Impact
+    st.subheader("Weather Impact on Tips")
+
     df_tip = load_parquet(TAXI_PREPROCESSED_TIP_SAMPLED)
 
-    # Calculate tip percentage if not already present
     if 'tip_percentage' not in df_tip.columns and 'tip_amount' in df_tip.columns and 'fare_amount' in df_tip.columns:
         df_tip['tip_percentage'] = (df_tip['tip_amount'] / df_tip['fare_amount'] * 100).clip(0, 100)
 
-    # Get numeric columns
     numeric_cols_tip = df_tip.select_dtypes(include=[np.number]).columns.tolist()
-
     weather_candidates = [c for c in numeric_cols_tip if any(k in c.lower()
                           for k in ['temperature','precipitation','rain','snowfall','wind_speed'])]
 
-    if not weather_candidates:
-        st.warning("No weather columns found in the dataset. Weather data may not have been merged.")
-    else:
+    if weather_candidates:
         col1, col2, col3 = st.columns(3)
         with col1:
-            wcol = st.selectbox("Select weather feature:", weather_candidates, key="eda_weather_col")
+            wcol = st.selectbox("Weather feature:", weather_candidates, key="eda_weather_col")
         with col2:
-            # Check which tip metrics are available
             available_metrics = []
             if 'tip_amount' in df_tip.columns:
                 available_metrics.append('tip_amount')
             if 'tip_percentage' in df_tip.columns:
                 available_metrics.append('tip_percentage')
 
-            if not available_metrics:
-                st.error("No tip metrics available in the dataset.")
-                return
-
             tip_metric = st.selectbox("Tip metric:", available_metrics, key="eda_tip_metric")
         with col3:
-            bins = st.slider("Number of bins:", 5, 20, 10, key="eda_weather_bins")
+            bins = st.slider("Bins:", 5, 20, 10, key="eda_weather_bins")
 
         if wcol and tip_metric and len(df_tip[wcol].dropna()) > 0:
             try:
@@ -592,14 +500,12 @@ def page_eda():
                 rate = tmp.groupby('_bin')[tip_metric].mean().reset_index()
                 rate.columns = ['bin', 'avg_tip']
                 rate['bin_mid'] = rate['bin'].apply(lambda iv: iv.mid if hasattr(iv, 'mid') else np.nan)
-                rate['bin_label'] = rate['bin'].astype(str)
 
                 fig = go.Figure()
                 fig.add_trace(go.Scatter(
                     x=rate['bin_mid'],
                     y=rate['avg_tip'],
                     mode='lines+markers',
-                    name=f'Average {tip_metric.replace("_", " ").title()}',
                     line=dict(color='#27ae60', width=3),
                     marker=dict(size=10)
                 ))
@@ -613,135 +519,357 @@ def page_eda():
                 )
                 st.plotly_chart(fig, width='stretch')
 
-                # Show summary statistics
-                st.markdown("**Analysis Summary:**")
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.metric("Average Tip", f"${tmp[tip_metric].mean():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].mean():.1f}%")
+                    st.metric("Average", f"${tmp[tip_metric].mean():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].mean():.1f}%")
                 with col2:
-                    st.metric("Min Tip", f"${tmp[tip_metric].min():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].min():.1f}%")
+                    st.metric("Min", f"${tmp[tip_metric].min():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].min():.1f}%")
                 with col3:
-                    st.metric("Max Tip", f"${tmp[tip_metric].max():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].max():.1f}%")
+                    st.metric("Max", f"${tmp[tip_metric].max():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].max():.1f}%")
 
             except Exception as e:
                 st.error(f"Error creating visualization: {str(e)}")
-        else:
-            st.warning(f"No valid data available for {wcol}")
+    else:
+        st.warning("No weather columns found in the dataset.")
 
 
 def page_advanced_analysis():
     """
-    Display advanced analysis page with multi-dimensional visualizations
-    including scatter matrices, 3D plots, and distribution comparisons.
+    Display advanced analysis page focusing on tip percentage patterns
+    with multi-dimensional visualizations and insights.
     """
-    st.header("Advanced Analysis & Visualizations")
-    
-    st.subheader("Multi-Dimensional Analysis")
-    
-    df = load_parquet(TAXI_PREPROCESSED_SAMPLED)
+    st.header("Advanced Analysis: Tip Percentage Insights")
 
-    st.write("### Interactive Scatter Matrix")
-    st.write("Explore relationships between multiple numeric variables simultaneously.")
-    
+    st.markdown("""
+    This section provides in-depth analysis of tipping patterns, focusing on **tip percentage** 
+    to understand what drives passenger generosity beyond absolute dollar amounts.
+    """)
+
+    df = load_parquet(TAXI_PREPROCESSED_TIP_SAMPLED)
+
+    # Convert tip_pct (decimal) to tip_percentage (0-100 scale)
+    df['tip_percentage'] = (df['tip_pct'] * 100).clip(0, 100)
+
+    # Key metrics overview
+    st.subheader("Tip Percentage Overview")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Average Tip %", f"{df['tip_percentage'].mean():.1f}%")
+    with col2:
+        st.metric("Median Tip %", f"{df['tip_percentage'].median():.1f}%")
+    with col3:
+        st.metric("Std Deviation", f"{df['tip_percentage'].std():.1f}%")
+    with col4:
+        generous_pct = (df['tip_percentage'] > 20).sum() / len(df) * 100
+        st.metric("Tips > 20%", f"{generous_pct:.1f}%")
+
+    st.markdown("---")
+
+    # Tip Percentage Distribution
+    st.subheader("Tip Percentage Distribution")
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        fig = px.histogram(
+            df[df['tip_percentage'] <= 50],  # Filter extreme outliers for better viz
+            x='tip_percentage',
+            nbins=50,
+            title="Distribution of Tip Percentages (0-50%)",
+            labels={'tip_percentage': 'Tip Percentage (%)', 'count': 'Frequency'},
+            color_discrete_sequence=['#3498db']
+        )
+        fig.add_vline(x=df['tip_percentage'].mean(), line_dash="dash",
+                     line_color="red", annotation_text="Mean")
+        fig.add_vline(x=df['tip_percentage'].median(), line_dash="dash",
+                     line_color="green", annotation_text="Median")
+        st.plotly_chart(fig, width='stretch')
+
+    with col2:
+        # Tip percentage categories
+        tip_ranges = pd.cut(df['tip_percentage'],
+                           bins=[0, 10, 15, 20, 25, 100],
+                           labels=['0-10%', '10-15%', '15-20%', '20-25%', '>25%'])
+        range_counts = tip_ranges.value_counts().sort_index()
+
+        fig = px.pie(
+            values=range_counts.values,
+            names=range_counts.index,
+            title="Tip Percentage Ranges",
+            color_discrete_sequence=['#e74c3c', '#f39c12', '#f1c40f', '#2ecc71', '#27ae60']
+        )
+        st.plotly_chart(fig, width='stretch')
+
+    st.markdown("---")
+
+    # Factors Affecting Tip Percentage
+    st.subheader("Factors Affecting Tip Percentage")
+
+    tab1, tab2, tab3, tab4 = st.tabs(["Time Patterns", "Trip Characteristics", "Weather Impact", "Passenger Behavior"])
+
+    with tab1:
+        st.write("**How does tip percentage vary by time?**")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if 'pickup_hour' in df.columns:
+                hourly_tips = df.groupby('pickup_hour')['tip_percentage'].agg(['mean', 'median', 'std']).reset_index()
+
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=hourly_tips['pickup_hour'],
+                    y=hourly_tips['mean'],
+                    mode='lines+markers',
+                    name='Mean',
+                    line=dict(color='#e74c3c', width=3),
+                    marker=dict(size=8)
+                ))
+                fig.add_trace(go.Scatter(
+                    x=hourly_tips['pickup_hour'],
+                    y=hourly_tips['median'],
+                    mode='lines+markers',
+                    name='Median',
+                    line=dict(color='#27ae60', width=3),
+                    marker=dict(size=8)
+                ))
+                fig.update_layout(
+                    title="Tip Percentage by Hour of Day",
+                    xaxis_title="Hour",
+                    yaxis_title="Tip Percentage (%)",
+                    hovermode='x unified'
+                )
+                st.plotly_chart(fig, width='stretch')
+
+        with col2:
+            if 'day_of_week' in df.columns:
+                day_names = {0: 'Mon', 1: 'Tue', 2: 'Wed', 3: 'Thu', 4: 'Fri', 5: 'Sat', 6: 'Sun'}
+                df_temp = df.copy()
+                df_temp['day_name'] = df_temp['day_of_week'].map(day_names)
+                daily_tips = df_temp.groupby('day_name')['tip_percentage'].mean().reindex(day_names.values())
+
+                fig = px.bar(
+                    x=daily_tips.index,
+                    y=daily_tips.values,
+                    title="Average Tip Percentage by Day of Week",
+                    labels={'x': 'Day', 'y': 'Tip Percentage (%)'},
+                    color=daily_tips.values,
+                    color_continuous_scale='Viridis'
+                )
+                st.plotly_chart(fig, width='stretch')
+
+    with tab2:
+        st.write("**How do trip characteristics influence tipping?**")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if 'trip_distance' in df.columns:
+                # Create distance bins
+                df_temp = df[df['trip_distance'] <= 20].copy()  # Filter extreme outliers
+                df_temp['distance_bin'] = pd.cut(df_temp['trip_distance'],
+                                                 bins=[0, 1, 3, 5, 10, 20],
+                                                 labels=['<1mi', '1-3mi', '3-5mi', '5-10mi', '10-20mi'])
+
+                distance_tips = df_temp.groupby('distance_bin')['tip_percentage'].agg(['mean', 'count']).reset_index()
+
+                fig = px.bar(
+                    distance_tips,
+                    x='distance_bin',
+                    y='mean',
+                    title="Average Tip % by Trip Distance",
+                    labels={'distance_bin': 'Distance Range', 'mean': 'Avg Tip %'},
+                    text='mean',
+                    color='mean',
+                    color_continuous_scale='Blues'
+                )
+                fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                st.plotly_chart(fig, width='stretch')
+
+        with col2:
+            if 'fare_amount' in df.columns:
+                # Create fare bins
+                df_temp = df[df['fare_amount'] <= 100].copy()
+                df_temp['fare_bin'] = pd.cut(df_temp['fare_amount'],
+                                             bins=[0, 10, 20, 30, 50, 100],
+                                             labels=['<$10', '$10-20', '$20-30', '$30-50', '$50-100'])
+
+                fare_tips = df_temp.groupby('fare_bin')['tip_percentage'].mean().reset_index()
+
+                fig = px.bar(
+                    fare_tips,
+                    x='fare_bin',
+                    y='tip_percentage',
+                    title="Average Tip % by Fare Amount",
+                    labels={'fare_bin': 'Fare Range', 'tip_percentage': 'Avg Tip %'},
+                    text='tip_percentage',
+                    color='tip_percentage',
+                    color_continuous_scale='Greens'
+                )
+                fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                st.plotly_chart(fig, width='stretch')
+
+    with tab3:
+        st.write("**Does weather affect tipping behavior?**")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if 'temperature_2m' in df.columns:
+                # Temperature bins
+                df_temp = df.copy()
+                df_temp['temp_category'] = pd.cut(df_temp['temperature_2m'],
+                                                  bins=[-20, 32, 50, 70, 85, 120],
+                                                  labels=['Freezing', 'Cold', 'Mild', 'Warm', 'Hot'])
+
+                temp_tips = df_temp.groupby('temp_category')['tip_percentage'].mean().reset_index()
+
+                fig = px.bar(
+                    temp_tips,
+                    x='temp_category',
+                    y='tip_percentage',
+                    title="Tip % by Temperature",
+                    labels={'temp_category': 'Temperature', 'tip_percentage': 'Avg Tip %'},
+                    color='tip_percentage',
+                    color_continuous_scale='RdYlBu_r'
+                )
+                st.plotly_chart(fig, width='stretch')
+
+        with col2:
+            if 'precipitation' in df.columns:
+                df_temp = df.copy()
+                df_temp['rain_category'] = pd.cut(df_temp['precipitation'],
+                                                  bins=[-0.1, 0, 0.1, 1, 10],
+                                                  labels=['No Rain', 'Light', 'Moderate', 'Heavy'])
+
+                rain_tips = df_temp.groupby('rain_category')['tip_percentage'].mean().reset_index()
+
+                fig = px.bar(
+                    rain_tips,
+                    x='rain_category',
+                    y='tip_percentage',
+                    title="Tip % by Precipitation Level",
+                    labels={'rain_category': 'Precipitation', 'tip_percentage': 'Avg Tip %'},
+                    color='tip_percentage',
+                    color_continuous_scale='Blues'
+                )
+                st.plotly_chart(fig, width='stretch')
+
+    with tab4:
+        st.write("**How do passenger count and taxi type affect tips?**")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if 'passenger_count' in df.columns:
+                passenger_tips = df[df['passenger_count'] <= 6].groupby('passenger_count')['tip_percentage'].mean().reset_index()
+
+                fig = px.line(
+                    passenger_tips,
+                    x='passenger_count',
+                    y='tip_percentage',
+                    title="Tip % by Passenger Count",
+                    labels={'passenger_count': '# Passengers', 'tip_percentage': 'Avg Tip %'},
+                    markers=True
+                )
+                fig.update_traces(line_color='#9b59b6', marker=dict(size=12))
+                st.plotly_chart(fig, width='stretch')
+
+        with col2:
+            if 'is_yellow' in df.columns:
+                taxi_tips = df.groupby('is_yellow')['tip_percentage'].mean().reset_index()
+                taxi_tips['Taxi Type'] = taxi_tips['is_yellow'].map({1: 'Yellow', 0: 'Green'})
+
+                fig = px.bar(
+                    taxi_tips,
+                    x='Taxi Type',
+                    y='tip_percentage',
+                    title="Tip % by Taxi Type",
+                    labels={'tip_percentage': 'Avg Tip %'},
+                    color='Taxi Type',
+                    color_discrete_map={'Yellow': '#f1c40f', 'Green': '#27ae60'}
+                )
+                st.plotly_chart(fig, width='stretch')
+
+    st.markdown("---")
+
+    # Multi-dimensional visualization
+    st.subheader("Multi-Dimensional Relationships")
+
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
-    selected_features = st.multiselect(
-        "Select features for scatter matrix (3-5 recommended):",
-        numeric_cols,
-        default=[col for col in ['fare_amount', 'trip_distance', 'duration_min', 'speed_mph'] if col in numeric_cols][:4]
-    )
-    
-    if len(selected_features) >= 2:
-        # Create a copy with labeled tip classes for better visualization
-        df_sample = df.sample(min(1000, len(df))).copy()
-        tip_labels = {0: 'Low', 1: 'Middle', 2: 'High'}
-        df_sample['Tip Class'] = df_sample['tip_class'].map(tip_labels)
+    col1, col2 = st.columns(2)
 
-        fig = px.scatter_matrix(
-            df_sample,
-            dimensions=selected_features,
-            color='Tip Class',
-            title="Pairwise Feature Relationships by Tip Class",
-            labels={col: col.replace('_', ' ').title() for col in selected_features},
-            color_discrete_map={'Low': '#e74c3c', 'Middle': '#f39c12', 'High': '#27ae60'}
-        )
-        fig.update_traces(diagonal_visible=False, showupperhalf=False)
-        st.plotly_chart(fig, width='stretch')
-    
-    st.write("### 3D Relationship Visualization")
-    
-    col1, col2, col3 = st.columns(3)
     with col1:
-        x_var = st.selectbox("X-axis:", numeric_cols, index=numeric_cols.index('trip_distance'), key="3d_x")
-    with col2:
-        y_var = st.selectbox("Y-axis:", numeric_cols, index=numeric_cols.index('duration_min'), key="3d_y")
-    with col3:
-        z_var = st.selectbox("Z-axis:", numeric_cols, index=numeric_cols.index('fare_amount'), key="3d_z")
+        st.write("**3D Scatter: Explore Complex Relationships**")
 
-    sample_df = df[[x_var, y_var, z_var, 'tip_class']].dropna().sample(min(2000, len(df))).copy()
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            x_var = st.selectbox("X-axis:", [c for c in numeric_cols if c != 'tip_percentage'],
+                                index=[c for c in numeric_cols if c != 'tip_percentage'].index('trip_distance')
+                                if 'trip_distance' in numeric_cols else 0, key="3d_x")
+        with col_b:
+            y_var = st.selectbox("Y-axis:", [c for c in numeric_cols if c != 'tip_percentage'],
+                                index=[c for c in numeric_cols if c != 'tip_percentage'].index('fare_amount')
+                                if 'fare_amount' in numeric_cols else 0, key="3d_y")
+        with col_c:
+            z_var = st.selectbox("Z-axis:", [c for c in numeric_cols if c != 'tip_percentage'],
+                                index=[c for c in numeric_cols if c != 'tip_percentage'].index('duration_min')
+                                if 'duration_min' in numeric_cols else 0, key="3d_z")
 
-    # Add labeled tip class for better visualization
-    tip_labels = {0: 'Low', 1: 'Middle', 2: 'High'}
-    sample_df['Tip Class'] = sample_df['tip_class'].map(tip_labels)
+        sample_df = df[[x_var, y_var, z_var, 'tip_percentage']].dropna().sample(min(2000, len(df))).copy()
 
-    fig = px.scatter_3d(
-        sample_df,
-        x=x_var,
-        y=y_var,
-        z=z_var,
-        color='Tip Class',
-        title=f"3D Visualization: {x_var} vs {y_var} vs {z_var}",
-        color_discrete_map={'Low': '#e74c3c', 'Middle': '#f39c12', 'High': '#27ae60'},
-        opacity=0.7
-    )
-    st.plotly_chart(fig, width='stretch')
-    
-    st.write("### Distribution Comparison by Category")
-    
-    # Include tip_class as a categorical variable even though it's numeric
-    cat_cols = df.select_dtypes(include=['object', 'category', 'bool']).columns.tolist()
-    # Add tip_class if it exists and is numeric
-    if 'tip_class' in df.columns and 'tip_class' not in cat_cols:
-        cat_cols.insert(0, 'tip_class')
-
-    # Also add other potentially categorical numeric columns
-    other_categorical = ['is_yellow', 'RatecodeID', 'day_of_week', 'pickup_hour']
-    for col in other_categorical:
-        if col in df.columns and col not in cat_cols:
-            cat_cols.append(col)
-
-    if cat_cols and numeric_cols:
-        col1, col2 = st.columns(2)
-        with col1:
-            default_cat = 'tip_class' if 'tip_class' in cat_cols else cat_cols[0] if cat_cols else None
-            category = st.selectbox("Select category:", cat_cols,
-                                   index=cat_cols.index(default_cat) if default_cat else 0,
-                                   key="box_cat")
-        with col2:
-            value = st.selectbox("Select numeric variable:", numeric_cols,
-                                index=numeric_cols.index('fare_amount') if 'fare_amount' in numeric_cols else 0,
-                                key="box_val")
-
-        # Create a copy with labeled categories if it's tip_class
-        df_plot = df.copy()
-        if category == 'tip_class':
-            tip_labels = {0: 'Low', 1: 'Middle', 2: 'High'}
-            df_plot['Tip Class'] = df_plot['tip_class'].map(tip_labels)
-            category_col = 'Tip Class'
-        else:
-            category_col = category
-
-        fig = px.box(
-            df_plot,
-            x=category_col,
-            y=value,
-            color=category_col,
-            title=f"{value} Distribution by {category_col}",
-            points="outliers"
+        fig = px.scatter_3d(
+            sample_df,
+            x=x_var,
+            y=y_var,
+            z=z_var,
+            color='tip_percentage',
+            title=f"3D View: {x_var} vs {y_var} vs {z_var} (colored by tip %)",
+            color_continuous_scale='RdYlGn',
+            opacity=0.7
         )
         st.plotly_chart(fig, width='stretch')
-    else:
-        st.warning("Insufficient categorical or numeric columns for box plot visualization.")
+
+    with col2:
+        st.write("**Correlation Heatmap**")
+
+        # Select key features for correlation
+        key_features = ['tip_percentage', 'fare_amount', 'trip_distance', 'duration_min',
+                       'pickup_hour', 'passenger_count']
+        available_features = [f for f in key_features if f in df.columns]
+
+        if len(available_features) >= 2:
+            corr_matrix = df[available_features].corr()
+
+            fig = px.imshow(
+                corr_matrix,
+                title="Feature Correlation with Tip Percentage",
+                color_continuous_scale='RdBu_r',
+                aspect='auto',
+                text_auto='.2f'
+            )
+            st.plotly_chart(fig, width='stretch')
+
+    st.markdown("---")
+
+    # Key insights
+    st.subheader("Key Insights")
+
+    st.markdown("""
+    **What we learned about tipping behavior:**
+    
+    - **Time matters**: Tips vary significantly by hour and day of the week
+    - **Trip length**: Longer trips don't always mean higher tip percentages
+    - **Fare amount**: There's often an inverse relationship - higher fares may get lower tip %
+    - **Weather impact**: Comfortable conditions correlate with better tipping
+    - **Group size**: Multiple passengers often tip more generously
+    - **Taxi type**: Yellow and green taxis show different tipping patterns
+    
+    These insights can help drivers optimize their earnings and understand passenger behavior better.
+    """)
 
 
 @st.cache_data
@@ -933,23 +1061,16 @@ def page_model_evaluation():
     """
     st.header("Model Development & Evaluation")
 
-    st.markdown("""
-    This section demonstrates the development and comprehensive evaluation of multiple machine learning models 
-    for predicting tip classes (Low, Middle, High) based on taxi trip and weather features.
-    """)
-
     # Model information
-    st.subheader("Models Implemented")
-
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("""
         **Traditional ML Models:**
         - Logistic Regression
-        - Decision Tree Classifier
-        - Random Forest Classifier
-        - Naive Bayes (Gaussian)
+        - Decision Tree
+        - Random Forest
+        - Naive Bayes
         """)
 
     with col2:
@@ -960,14 +1081,13 @@ def page_model_evaluation():
         - SVM (Linear SGD)
         """)
 
-    st.info("All models use **class balancing** to handle imbalanced tip classes.")
+    st.caption("All models use class balancing to handle imbalanced tip classes")
 
     st.markdown("---")
 
-    # Model Comparison Section
+    # Model Comparison
     st.subheader("Model Performance Comparison")
 
-    # Use hard-coded model results instead of loading from files
     model_results = get_hardcoded_model_results()
 
     # Create comparison dataframe
@@ -979,12 +1099,10 @@ def page_model_evaluation():
     # Display metrics table
     st.dataframe(
         comparison_df.style.highlight_max(axis=0, color='lightgreen'),
-        width='stretch'
+        use_container_width=True
     )
 
-    # Visualize model comparison
-    st.subheader("Visual Comparison")
-
+    # Visualize comparison
     metric_to_plot = st.selectbox(
         "Select metric to compare:",
         ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'Training Time (s)', 'Prediction Time (s)'],
@@ -996,35 +1114,12 @@ def page_model_evaluation():
         x='index',
         y=metric_to_plot,
         title=f"Model Comparison: {metric_to_plot}",
-        labels={'index': 'Model', metric_to_plot: metric_to_plot},
+        labels={'index': 'Model'},
         color=metric_to_plot,
         color_continuous_scale='viridis'
     )
     fig.update_layout(xaxis_tickangle=-45, height=500)
-    st.plotly_chart(fig, width='stretch')
-
-    # Multi-metric radar chart
-    st.subheader("Multi-Metric Comparison (Radar Chart)")
-
-    metrics_for_radar = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
-
-    fig = go.Figure()
-
-    for model_name, data in model_results.items():
-        fig.add_trace(go.Scatterpolar(
-            r=[data[metric] for metric in metrics_for_radar],
-            theta=metrics_for_radar,
-            fill='toself',
-            name=model_name
-        ))
-
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-        showlegend=True,
-        title="Model Performance Across Multiple Metrics",
-        height=600
-    )
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
@@ -1040,25 +1135,17 @@ def page_model_evaluation():
     if selected_model:
         model_data = model_results[selected_model]
 
-        # Display metrics in columns
+        # Display metrics
         col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
-            st.metric("Accuracy", f"{model_data['Accuracy']:.4f}")
-        with col2:
-            st.metric("Precision", f"{model_data['Precision']:.4f}")
-        with col3:
-            st.metric("Recall", f"{model_data['Recall']:.4f}")
-        with col4:
-            st.metric("F1-Score", f"{model_data['F1-Score']:.4f}")
+        col1.metric("Accuracy", f"{model_data['Accuracy']:.4f}")
+        col2.metric("Precision", f"{model_data['Precision']:.4f}")
+        col3.metric("Recall", f"{model_data['Recall']:.4f}")
+        col4.metric("F1-Score", f"{model_data['F1-Score']:.4f}")
 
         # Confusion Matrix
         if model_data['confusion_matrix'] is not None:
-            st.subheader("Confusion Matrix")
-
             cm = model_data['confusion_matrix']
 
-            # Create annotated heatmap
             fig = px.imshow(
                 cm,
                 labels=dict(x="Predicted", y="Actual", color="Count"),
@@ -1069,31 +1156,7 @@ def page_model_evaluation():
                 title=f"Confusion Matrix: {selected_model}"
             )
             fig.update_layout(height=500)
-            st.plotly_chart(fig, width='stretch')
-
-            # Calculate per-class metrics
-            st.subheader("Per-Class Performance")
-
-            class_metrics = []
-            for i, class_name in enumerate(['Low', 'Middle', 'High']):
-                tp = cm[i, i]
-                fp = cm[:, i].sum() - tp
-                fn = cm[i, :].sum() - tp
-                tn = cm.sum() - tp - fp - fn
-
-                precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-                recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-                f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-
-                class_metrics.append({
-                    'Class': class_name,
-                    'Precision': f"{precision:.4f}",
-                    'Recall': f"{recall:.4f}",
-                    'F1-Score': f"{f1:.4f}",
-                    'Support': cm[i, :].sum()
-                })
-
-            st.dataframe(pd.DataFrame(class_metrics), width='stretch', hide_index=True)
+            st.plotly_chart(fig, use_container_width=True)
 
         # Classification Report
         if model_data['classification_report']:
@@ -1102,10 +1165,9 @@ def page_model_evaluation():
 
     st.markdown("---")
 
-    # Model Selection Guidance
+    # Best Models Summary
     st.subheader("Model Selection Guidance")
 
-    # Find best model for each metric
     best_accuracy = max(model_results.items(), key=lambda x: x[1]['Accuracy'])
     best_f1 = max(model_results.items(), key=lambda x: x[1]['F1-Score'])
     fastest_training = min(model_results.items(), key=lambda x: x[1]['Training Time (s)'])
@@ -1120,86 +1182,6 @@ def page_model_evaluation():
     with col2:
         st.info(f"**Fastest Training:** {fastest_training[0]} ({fastest_training[1]['Training Time (s)']:.2f}s)")
         st.info(f"**Fastest Prediction:** {fastest_prediction[0]} ({fastest_prediction[1]['Prediction Time (s)']:.2f}s)")
-
-    st.markdown("""
-    ### Model Selection Considerations:
-    
-    - **For Best Performance:** Choose models with highest Accuracy and F1-Score
-    - **For Real-Time Applications:** Consider prediction time (faster models like Logistic Regression or SGD)
-    - **For Interpretability:** Decision Trees offer clear decision paths
-    - **For Robustness:** Ensemble methods (Random Forest, Gradient Boosting) typically generalize better
-    """)
-
-    st.markdown("---")
-
-    # Feature Importance (if available)
-    st.subheader("Feature Importance Analysis")
-
-    # Try to get feature importance from tree-based models
-    feature_importance_models = ['Random Forest', 'Decision Tree', 'Hist Gradient Boosting']
-
-    available_fi_models = [m for m in feature_importance_models if m in model_results]
-
-    if available_fi_models:
-        fi_model_name = st.selectbox(
-            "Select model for feature importance:",
-            available_fi_models,
-            key='fi_model'
-        )
-
-        model_obj = model_results[fi_model_name]['model']
-
-        model_obj = model_results[fi_model_name]['model']
-
-        if model_obj is not None and hasattr(model_obj, 'feature_importances_'):
-            # Load feature names from preprocessed data
-            df = load_parquet(TAXI_PREPROCESSED_SAMPLED)
-
-            # Get numeric columns (these would be the features used in training)
-            feature_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-
-            # Remove target variable if present
-            if 'tip_class' in feature_cols:
-                feature_cols.remove('tip_class')
-
-            importances = model_obj.feature_importances_
-
-            # Match length (in case of mismatch)
-            min_len = min(len(feature_cols), len(importances))
-
-            fi_df = pd.DataFrame({
-                'Feature': feature_cols[:min_len],
-                'Importance': importances[:min_len]
-            }).sort_values('Importance', ascending=False).head(20)
-
-            fig = px.bar(
-                fi_df,
-                x='Importance',
-                y='Feature',
-                orientation='h',
-                title=f"Top 20 Feature Importances: {fi_model_name}",
-                color='Importance',
-                color_continuous_scale='viridis'
-            )
-            fig.update_layout(height=600)
-            st.plotly_chart(fig, width='stretch')
-
-            st.info("Feature importance shows which features most strongly influence tip predictions.")
-        else:
-            st.info("""
-            **Note:** Feature importance visualization requires the actual trained model objects, 
-            which are not included in this deployment to reduce file size. 
-            
-            The models showed that the most important features for predicting tips were:
-            - Trip distance
-            - Fare amount
-            - Trip duration
-            - Time of day (hour)
-            - Day of the week
-            - Weather conditions (temperature, precipitation)
-            """)
-    else:
-        st.info("Feature importance is only available for tree-based models (Random Forest, Decision Tree, Gradient Boosting).")
 
 
 def page_interactive_prediction():
@@ -1226,13 +1208,9 @@ def page_interactive_prediction():
                 model_name = model_data.get('model_name', model_file.stem)
                 available_models[model_name] = model_data.get('model')
 
-    # Get hard-coded model list
-    hardcoded_models = get_hardcoded_model_results()
-    model_names = list(hardcoded_models.keys())
-
     selected_model = st.selectbox(
         "Select a model for prediction:",
-        model_names,
+        list(available_models.keys()) if available_models else ['Demo Model (No actual model loaded)'],
         key='prediction_model'
     )
 
@@ -1293,12 +1271,7 @@ def page_interactive_prediction():
         actual_model = available_models.get(selected_model) if available_models else None
 
         if actual_model is None:
-            st.info("""
-            **Note:** This is a demonstration interface showing how predictions would work. 
-            The actual trained model files are not included in this deployment to reduce repository size.
-            
-            Based on the input parameters and our model analysis, here's an estimated prediction:
-            """)
+            st.info("**Note:** Demo prediction based on heuristics (model files not included in deployment)")
 
         # Simulated prediction based on heuristics
         tip_classes = ['Low Tip (0-10%)', 'Middle Tip (10-20%)', 'High Tip (>20%)']
@@ -1351,7 +1324,7 @@ def page_interactive_prediction():
             title="Prediction Probabilities"
         )
         fig.update_layout(showlegend=False, height=400)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
         # Show contributing factors
         st.markdown("**Key Factors Influencing This Prediction:**")
@@ -1377,17 +1350,13 @@ def page_interactive_prediction():
 
     st.markdown("---")
 
-    st.subheader("Tips for Better Tips")
-
-    st.markdown("""
-    Based on our analysis, here are factors that correlate with higher tips:
-    
-    - **Longer trips** tend to receive proportionally better tips
-    - **Off-peak hours** may see more generous tipping
-    - **Good weather** conditions correlate with better tips
-    - **Multiple passengers** often tip better
-    - **Efficient service** (good speed, direct routes) encourages tipping
-    """)
+    with st.expander("💡 Tips for Better Tips"):
+        st.markdown("""
+        - Longer trips tend to receive better tip percentages
+        - Good weather conditions correlate with better tips
+        - Multiple passengers often tip more generously
+        - Efficient service encourages better tipping
+        """)
 
 
 def page_methodology():
@@ -1397,177 +1366,70 @@ def page_methodology():
     """
     st.header("Methodology & Techniques")
 
-    st.markdown("""
-    This section provides a comprehensive overview of the data science techniques
-    and methodologies applied throughout this project.
-    """)
-
-    # Workflow diagram
+    # Workflow
     st.subheader("Data Science Workflow")
 
-    workflow_steps = [
-        "**Data Collection**",
-        "**Data Cleaning & Integration**",
-        "**Feature Engineering**",
-        "**Missing Data Imputation**",
-        "**Exploratory Analysis**",
-        "**Model Development**",
-        "**Model Evaluation**",
-        "**Deployment & Visualization**"
-    ]
-
-    for step in workflow_steps:
-        st.markdown(step)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        1. **Data Collection & Integration**
+        2. **Data Cleaning**
+        3. **Feature Engineering**
+        4. **Missing Data Imputation**
+        """)
+    with col2:
+        st.markdown("""
+        5. **Exploratory Analysis**
+        6. **Model Development**
+        7. **Model Evaluation**
+        8. **Deployment**
+        """)
 
     st.markdown("---")
 
     # Data Processing Techniques
-    st.subheader("Data Processing Techniques")
+    st.subheader("Key Techniques")
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Data Collection",
-        "Feature Engineering",
-        "Missing Data",
-        "Model Validation"
-    ])
+    tab1, tab2 = st.tabs(["Data Processing", "Model Development"])
 
     with tab1:
         st.markdown("""
         ### Data Collection & Integration
         
-        **Three Distinct Data Sources:**
+        **Data Sources:**
+        1. NYC TLC Yellow & Green Taxi Data (Parquet format)
+        2. Historical Weather Data (Open-Meteo API, hourly)
         
-        1. **NYC TLC Yellow Taxi Data**
-           - Source: NYC Taxi & Limousine Commission
-           - Format: Parquet files
-           - Features: Trip details, fares, locations, timestamps
-           
-        2. **NYC TLC Green Taxi Data**
-           - Source: NYC Taxi & Limousine Commission
-           - Format: Parquet files
-           - Coverage: Outer boroughs and specific areas
-           
-        3. **Historical Weather Data**
-           - Source: Open-Meteo API
-           - Granularity: Hourly observations
-           - Features: Temperature, precipitation, wind speed, etc.
+        **Integration:** Temporal join based on pickup timestamp
         
-        **Integration Technique:**
-        - Temporal join based on pickup timestamp
-        - Nearest hour matching for weather data
-        - Data validation and consistency checks
+        ### Feature Engineering
+        
+        **Derived Features:**
+        - **Temporal:** `pickup_hour`, `day_of_week`, `is_weekend`, `month`
+        - **Trip:** `duration_min`, `speed_mph`, `fare_per_mile`
+        - **Target:** `tip_class` (Low: 0-10%, Middle: 10-20%, High: >20%)
+        
+        ### Missing Data Handling
+        
+        **Technique:** Iterative Imputation (MICE)
+        - Models each feature with missing values as function of other features
+        - Preserves relationships between variables
+        - Applied to `passenger_count`, `RatecodeID`, and other numeric features
         """)
 
     with tab2:
         st.markdown("""
-        ### Feature Engineering
-        
-        **Derived Features:**
-        
-        - **Temporal Features:**
-          - `pickup_hour`: Hour of day (0-23)
-          - `day_of_week`: Day of week (0-6)
-          - `is_weekend`: Weekend indicator
-          - `month`: Month of year
-        
-        - **Trip Characteristics:**
-          - `duration_min`: Trip duration in minutes
-          - `speed_mph`: Average speed (distance/time)
-          - `fare_per_mile`: Fare efficiency metric
-          - `fare_per_minute`: Time-based fare metric
-        
-        - **Target Variable:**
-          - `tip_class`: Categorical tip amount (Low: 0-10%, Middle: 10-20%, High: >20%)
-        
-        **Rationale:**
-        - Capture temporal patterns in tipping behavior
-        - Create interpretable metrics for analysis
-        - Enable multi-class classification
-        """)
-
-    with tab3:
-        st.markdown("""
-        ### Missing Data Handling
-        
-        **Technique:** Iterative Imputation (MICE - Multiple Imputation by Chained Equations)
-        
-        **Why Iterative Imputation?**
-        - More sophisticated than mean/median imputation
-        - Models each feature with missing values as a function of other features
-        - Preserves relationships between variables
-        - Better handles complex missing data patterns
-        
-        **Implementation:**
-        ```python
-        from sklearn.impute import IterativeImputer
-        
-        imputer = IterativeImputer(
-            max_iter=10,
-            random_state=42,
-            verbose=0
-        )
-        ```
-        
-        **Features Imputed:**
-        - `passenger_count`
-        - `RatecodeID`
-        - Other relevant numeric features
-        
-        **Validation:**
-        - Distribution comparison before/after imputation
-        - Correlation preservation check
-        """)
-
-    with tab4:
-        st.markdown("""
         ### Model Validation & Selection
         
-        **Train-Test Split:**
-        - Training: 80% of data
-        - Testing: 20% of data
-        - Stratified split to maintain class balance
+        **Train-Test Split:** 80/20 with stratified sampling
         
         **Evaluation Metrics:**
+        - Accuracy, Precision, Recall, F1-Score
+        - Confusion Matrix for per-class performance
         
-        - **Accuracy:** Overall correctness
-        - **Precision:** Positive prediction reliability
-        - **Recall:** Actual positive detection rate
-        - **F1-Score:** Harmonic mean of precision and recall
-        - **Confusion Matrix:** Per-class performance visualization
+        **Class Balancing:** Applied `class_weight='balanced'`
         
-        **Class Balancing:**
-        - Applied `class_weight='balanced'` to handle imbalanced tip classes
-        - Ensures all tip categories are weighted appropriately
-        
-        **Cross-Validation Considerations:**
-        - Multiple models tested for comparison
-        - Performance vs. speed tradeoffs analyzed
-        - Feature importance evaluated for interpretability
-        """)
-
-    st.markdown("---")
-
-    # Advanced Techniques
-    st.subheader("Advanced Techniques Applied")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        **Machine Learning:**
-        - Ensemble Methods (Random Forest, Gradient Boosting)
-        - Support Vector Machines (Linear SGD)
-        - Hyperparameter optimization
-        - Class balancing strategies
-        """)
-
-    with col2:
-        st.markdown("""
-        **Data Engineering:**
-        - Efficient data loading with Parquet format
-        - Caching strategies for performance (`@st.cache_data`)
-        - Sampling for visualization efficiency
-        - Memory-efficient processing techniques
+        **Models Tested:** 7 algorithms from Logistic Regression to Gradient Boosting
         """)
 
     st.markdown("---")
@@ -1575,47 +1437,36 @@ def page_methodology():
     # Technical Stack
     st.subheader("Technical Stack")
 
-    tech_stack = {
-        'Data Processing': ['pandas', 'numpy', 'duckdb'],
-        'Machine Learning': ['scikit-learn', 'torch'],
-        'Visualization': ['plotly', 'streamlit'],
-        'Data Collection': ['requests', 'beautifulsoup4'],
-        'Storage': ['parquet', 'pickle']
-    }
+    col1, col2, col3 = st.columns(3)
 
-    for category, tools in tech_stack.items():
-        st.markdown(f"**{category}:** {', '.join(tools)}")
+    with col1:
+        st.markdown("""
+        **Data Processing**
+        - pandas, numpy
+        - scikit-learn
+        """)
+
+    with col2:
+        st.markdown("""
+        **Visualization**
+        - plotly
+        - streamlit
+        """)
+
+    with col3:
+        st.markdown("""
+        **Storage**
+        - parquet
+        - pickle
+        """)
+
 
 
 # ---------- Menu ----------
 def main():
     """
-    Main function to configure the Streamlit app and handle navigation
-    between different pages.
+    Main function to handle navigation between different pages.
     """
-    # Configure page settings
-    st.set_page_config(
-        page_title="CMSE 830 Data Analysis Project",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    
-    # Custom CSS for better styling
-    st.markdown("""
-    <style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1f77b4;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
     # Create sidebar navigation
     st.sidebar.title("NYC Taxi Analysis")
@@ -1638,24 +1489,13 @@ def main():
     # Display project information in sidebar
     st.sidebar.markdown("---")
     st.sidebar.markdown("""
-    ### Project Info
     **Author:** Zhiqiang Ni  
-    **Course:** CMSE 830  
-    **Institution:** Michigan State University
+    **Course:** CMSE 830 | MSU
     
-    ### Project Goals
-    - Analyze NYC taxi tipping patterns
-    - Predict tip classes using ML
-    - Identify key tipping factors
-    
-    ### Dataset Size
-    - 2024 Yellow & Green Taxi Data
-    - Hourly Weather Data
-    - 1M+ trip records analyzed
+    **Dataset:** 2024 NYC Taxi + Weather  
+    **Records:** 1M+ trips analyzed
     """)
 
-    st.sidebar.markdown("---")
-    st.sidebar.info("**Tip:** Use the navigation menu above to explore different sections of the analysis.")
 
     # Route to appropriate page based on menu selection
     if menu == "Overview":
