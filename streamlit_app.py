@@ -471,8 +471,7 @@ def page_eda():
 
     df_tip = load_parquet(TAXI_PREPROCESSED_TIP_SAMPLED)
 
-    if 'tip_percentage' not in df_tip.columns and 'tip_amount' in df_tip.columns and 'fare_amount' in df_tip.columns:
-        df_tip['tip_percentage'] = (df_tip['tip_amount'] / df_tip['fare_amount'] * 100).clip(0, 100)
+    df_tip['tip_percentage'] = (df_tip['tip_pct'] * 100).clip(0, 100)
 
     numeric_cols_tip = df_tip.select_dtypes(include=[np.number]).columns.tolist()
     weather_candidates = [c for c in numeric_cols_tip if any(k in c.lower()
@@ -1092,66 +1091,247 @@ def page_model_evaluation():
         width='stretch'
     )
 
-    # Visualize comparison
-    metric_to_plot = st.selectbox(
-        "Select metric to compare:",
-        ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'Training Time (s)', 'Prediction Time (s)'],
-        key='metric_compare'
+    # Visualize comparison with multiple chart types
+    st.markdown("### Performance Metrics Visualization")
+
+    viz_type = st.radio(
+        "Select visualization type:",
+        ['Bar Chart', 'Radar Chart', 'Performance vs Speed Trade-off', 'Multi-Metric Dashboard'],
+        horizontal=True,
+        key='viz_type'
     )
 
-    fig = px.bar(
-        comparison_df.reset_index(),
-        x='index',
-        y=metric_to_plot,
-        title=f"Model Comparison: {metric_to_plot}",
-        labels={'index': 'Model'},
-        color=metric_to_plot,
-        color_continuous_scale='viridis'
-    )
-    fig.update_layout(xaxis_tickangle=-45, height=500)
-    st.plotly_chart(fig, width='stretch')
+    if viz_type == 'Bar Chart':
+        metric_to_plot = st.selectbox(
+            "Select metric to compare:",
+            ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'Training Time (s)', 'Prediction Time (s)'],
+            key='metric_compare'
+        )
+
+        fig = px.bar(
+            comparison_df.reset_index(),
+            x='index',
+            y=metric_to_plot,
+            title=f"Model Comparison: {metric_to_plot}",
+            labels={'index': 'Model'},
+            color=metric_to_plot,
+            color_continuous_scale='viridis'
+        )
+        fig.update_layout(xaxis_tickangle=-45, height=500)
+        st.plotly_chart(fig, width='stretch')
+
+    elif viz_type == 'Radar Chart':
+        # Create radar chart comparing all performance metrics (normalized)
+        metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score']
+
+        fig = go.Figure()
+
+        for model_name in comparison_df.index:
+            values = [comparison_df.loc[model_name, metric] for metric in metrics]
+            values.append(values[0])  # Close the polygon
+
+            fig.add_trace(go.Scatterpolar(
+                r=values,
+                theta=metrics + [metrics[0]],
+                fill='toself',
+                name=model_name
+            ))
+
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 1]
+                )
+            ),
+            showlegend=True,
+            title="Model Performance Radar Chart (Performance Metrics)",
+            height=600
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    elif viz_type == 'Performance vs Speed Trade-off':
+        # Scatter plot showing accuracy vs training time trade-off
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=comparison_df['Training Time (s)'],
+            y=comparison_df['Accuracy'],
+            mode='markers+text',
+            marker=dict(
+                size=comparison_df['F1-Score'] * 100,  # Size based on F1-Score
+                color=comparison_df['Precision'],
+                colorscale='Viridis',
+                showscale=True,
+                colorbar=dict(title="Precision"),
+                line=dict(width=1, color='white')
+            ),
+            text=comparison_df.index,
+            textposition="top center",
+            name='Models',
+            hovertemplate='<b>%{text}</b><br>' +
+                          'Training Time: %{x:.2f}s<br>' +
+                          'Accuracy: %{y:.4f}<br>' +
+                          '<extra></extra>'
+        ))
+
+        fig.update_layout(
+            title="Model Performance vs Training Time Trade-off<br><sub>Bubble size = F1-Score, Color = Precision</sub>",
+            xaxis_title="Training Time (seconds)",
+            yaxis_title="Accuracy",
+            height=600,
+            hovermode='closest'
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.info("💡 **Insight:** Look for models in the top-left corner for best performance with fastest training time. Bubble size indicates F1-Score.")
+
+    elif viz_type == 'Multi-Metric Dashboard':
+        # Create subplots with multiple metrics
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=('Accuracy by Model', 'F1-Score by Model',
+                          'Training Time Comparison', 'Prediction Time Comparison'),
+            specs=[[{'type': 'bar'}, {'type': 'bar'}],
+                   [{'type': 'bar'}, {'type': 'bar'}]]
+        )
+
+        models = comparison_df.index.tolist()
+
+        # Accuracy
+        fig.add_trace(
+            go.Bar(x=models, y=comparison_df['Accuracy'],
+                   name='Accuracy', marker_color='lightblue',
+                   text=comparison_df['Accuracy'].round(4),
+                   textposition='outside'),
+            row=1, col=1
+        )
+
+        # F1-Score
+        fig.add_trace(
+            go.Bar(x=models, y=comparison_df['F1-Score'],
+                   name='F1-Score', marker_color='lightgreen',
+                   text=comparison_df['F1-Score'].round(4),
+                   textposition='outside'),
+            row=1, col=2
+        )
+
+        # Training Time
+        fig.add_trace(
+            go.Bar(x=models, y=comparison_df['Training Time (s)'],
+                   name='Training Time', marker_color='lightsalmon',
+                   text=comparison_df['Training Time (s)'].round(2),
+                   textposition='outside'),
+            row=2, col=1
+        )
+
+        # Prediction Time
+        fig.add_trace(
+            go.Bar(x=models, y=comparison_df['Prediction Time (s)'],
+                   name='Prediction Time', marker_color='plum',
+                   text=comparison_df['Prediction Time (s)'].round(2),
+                   textposition='outside'),
+            row=2, col=2
+        )
+
+        # Update axes
+        for i in range(1, 3):
+            for j in range(1, 3):
+                fig.update_xaxes(tickangle=-45, row=i, col=j)
+
+        fig.update_layout(
+            height=800,
+            showlegend=False,
+            title_text="Comprehensive Model Performance Dashboard"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
-    # Detailed Model Analysis
-    st.subheader("Detailed Model Analysis")
+    # Detailed Model Analysis - All Confusion Matrices
+    st.subheader("Detailed Model Analysis - Confusion Matrices")
+    st.markdown("Comparing prediction patterns across all models")
 
-    selected_model = st.selectbox(
-        "Select a model for detailed analysis:",
-        list(model_results.keys()),
-        key='detailed_model'
+    # Create a grid of confusion matrices for all models
+    model_names = list(model_results.keys())
+
+    # Create subplots: 3 rows x 3 columns (7 models + 1 empty space)
+    fig = make_subplots(
+        rows=3, cols=3,
+        subplot_titles=model_names + [''],  # Add empty title for unused subplot
+        specs=[[{'type': 'heatmap'}, {'type': 'heatmap'}, {'type': 'heatmap'}],
+               [{'type': 'heatmap'}, {'type': 'heatmap'}, {'type': 'heatmap'}],
+               [{'type': 'heatmap'}, {'type': 'heatmap'}, None]],  # Last cell is None (unused)
+        vertical_spacing=0.12,
+        horizontal_spacing=0.08
     )
 
-    if selected_model:
-        model_data = model_results[selected_model]
+    # Class labels
+    class_labels = ['Low', 'Middle', 'High']
 
-        # Display metrics
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Accuracy", f"{model_data['Accuracy']:.4f}")
-        col2.metric("Precision", f"{model_data['Precision']:.4f}")
-        col3.metric("Recall", f"{model_data['Recall']:.4f}")
-        col4.metric("F1-Score", f"{model_data['F1-Score']:.4f}")
+    # Add confusion matrix for each model
+    for idx, model_name in enumerate(model_names):
+        row = idx // 3 + 1
+        col = idx % 3 + 1
 
-        # Confusion Matrix
-        if model_data['confusion_matrix'] is not None:
-            cm = model_data['confusion_matrix']
+        cm = model_results[model_name]['confusion_matrix']
 
-            fig = px.imshow(
-                cm,
-                labels=dict(x="Predicted", y="Actual", color="Count"),
-                x=['Low', 'Middle', 'High'],
-                y=['Low', 'Middle', 'High'],
-                color_continuous_scale='Blues',
-                text_auto=True,
-                title=f"Confusion Matrix: {selected_model}"
-            )
-            fig.update_layout(height=500)
-            st.plotly_chart(fig, width='stretch')
+        # Normalize for better visualization across different scales
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
-        # Classification Report
-        if model_data['classification_report']:
-            with st.expander("View Full Classification Report"):
-                st.text(model_data['classification_report'])
+        # Create heatmap
+        fig.add_trace(
+            go.Heatmap(
+                z=cm,
+                x=class_labels,
+                y=class_labels,
+                colorscale='Blues',
+                showscale=(col == 3),  # Only show colorbar for rightmost plots
+                text=cm,
+                texttemplate='%{text}',
+                textfont={"size": 10},
+                hovertemplate='Actual: %{y}<br>Predicted: %{x}<br>Count: %{z}<extra></extra>'
+            ),
+            row=row, col=col
+        )
+
+        # Update axes labels
+        fig.update_xaxes(title_text="Predicted", row=row, col=col, tickfont=dict(size=9))
+        fig.update_yaxes(title_text="Actual", row=row, col=col, tickfont=dict(size=9))
+
+    fig.update_layout(
+        height=1000,
+        title_text="Confusion Matrices - All Models Comparison",
+        showlegend=False
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Add expandable section for detailed metrics of each model
+    st.markdown("### Individual Model Metrics")
+
+    # Create columns for better layout
+    cols = st.columns(2)
+
+    for idx, (model_name, model_data) in enumerate(model_results.items()):
+        with cols[idx % 2]:
+            with st.expander(f"📊 {model_name} - Details"):
+                # Display metrics
+                metric_cols = st.columns(4)
+                metric_cols[0].metric("Accuracy", f"{model_data['Accuracy']:.4f}")
+                metric_cols[1].metric("Precision", f"{model_data['Precision']:.4f}")
+                metric_cols[2].metric("Recall", f"{model_data['Recall']:.4f}")
+                metric_cols[3].metric("F1-Score", f"{model_data['F1-Score']:.4f}")
+
+                time_cols = st.columns(2)
+                time_cols[0].metric("Training Time", f"{model_data['Training Time (s)']:.2f}s")
+                time_cols[1].metric("Prediction Time", f"{model_data['Prediction Time (s)']:.2f}s")
+
+                # Classification Report
+                if model_data['classification_report']:
+                    st.text("Classification Report:")
+                    st.text(model_data['classification_report'])
 
     st.markdown("---")
 
