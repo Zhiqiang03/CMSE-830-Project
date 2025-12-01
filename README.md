@@ -1,5 +1,9 @@
 # NYC Taxi Ride Analysis & Tip Prediction
 
+> **🌟 LIVE DEPLOYMENT NOTICE 🌟**  
+> This application is **Streamlit Cloud's free tier** so it will run out of memory.
+> If you encounter "😦 Oh no." errors, see the [Troubleshooting](#troubleshooting) section below.
+
 A comprehensive data science project examining the factors that influence taxi trip tips in New York City. This project demonstrates advanced data collection, preprocessing, exploratory data analysis, feature engineering, and machine learning modeling to predict tip amounts using over 1 million trip records.
 
 **Author:** Zhiqiang Ni  
@@ -14,13 +18,14 @@ A comprehensive data science project examining the factors that influence taxi t
 
 This project analyzes NYC taxi data to uncover the factors that influence passenger tipping behavior by:
 - Combining 2024 taxi trip records with hourly weather data
-- Processing and analyzing 1M+ taxi trips
-- Building and comparing 7 machine learning models
-- Creating an interactive Streamlit dashboard for exploration and prediction
+- Processing and analyzing 3M+ taxi trips (smart sampling for analysis)
+- Building and comparing 8 models
+- Creating an interactive Streamlit dashboard with memory-optimized operations
+- Deploying on Streamlit Cloud with resource-efficient techniques
 
 ### Key Metrics
 - **Data Sources:** 3 (Yellow Taxi, Green Taxi, Weather API)
-- **Records Analyzed:** 1,000,000+ trips
+- **Records Processed:** 3M+ trips
 - **ML Models Trained:** 7
 - **Best Model Accuracy:** 63.42% (SVM Linear SGD)
 - **Interactive Visualizations:** 15+
@@ -78,8 +83,8 @@ This project analyzes NYC taxi data to uncover the factors that influence passen
   - Joins weather data based on pickup timestamp
   - Creates unified feature set with 104 features
 
-### 3. Missing Data Imputation (`impute.ipynb`)
-- Uses `IterativeImputer` from scikit-learn for intelligent missing value handling
+- **Smart Sampling for Analysis:**
+  - Implements random sampling for memory-efficient analysis
 - Imputes key numerical features while preserving data distributions
 - Comparative analysis of pre/post imputation data quality
 
@@ -191,16 +196,18 @@ The app will open in your default browser at `http://localhost:8501`
 
 ### Streamlit App Navigation
 
-The application includes 8 interactive pages:
+The application includes 8 interactive pages with memory-optimized rendering:
 
 1. **Overview** - Project introduction and key highlights
 2. **Data Collection** - Information about data sources and collection process
-3. **Initial Data Analysis** - Basic statistics and data quality assessment
-4. **EDA & Visualization** - Interactive exploratory data analysis
-5. **Advanced Analysis** - Deep-dive statistical analysis and insights
+3. **Initial Data Analysis** - Basic statistics and data quality assessment (uses sampling)
+4. **EDA & Visualization** - Interactive exploratory data analysis (optimized with 50K samples)
+5. **Advanced Analysis** - Deep-dive statistical analysis and insights (optimized with 50K samples)
 6. **Model Evaluation** - Model comparison and performance metrics
 7. **Interactive Prediction** - Real-time tip prediction tool
 8. **Methodology** - Technical details and research approach
+
+**Note:** Pages showing "Analysis based on a sample of X records" use representative sampling to ensure fast loading and smooth performance on Streamlit Cloud while maintaining statistical accuracy.
 
 ### Training Models
 
@@ -223,7 +230,7 @@ This will:
 ### Data Processing & Analysis
 - **Pandas** - Data manipulation and analysis
 - **NumPy** - Numerical computing
-- **DuckDB** - In-memory analytical database for efficient data queries
+- **DuckDB** - In-memory analytical database for efficient data queries and memory-optimized operations
 
 ### Machine Learning
 - **scikit-learn** - ML models, preprocessing, and evaluation
@@ -239,17 +246,13 @@ This will:
 - **Seaborn** - Statistical data visualization
 
 ### Web Application
-- **Streamlit** - Interactive web dashboard framework
-
-### Data Collection
+- **Streamlit** - Interactive web dashboard framework with optimized caching
 - **Requests** - HTTP library for API calls
 - **BeautifulSoup4** - Web scraping and HTML parsing
 
 ### Development Tools
 - **Jupyter Notebook** - Interactive development and analysis
-- **Python 3.9+** - Core programming language
-
----
+- **Python 3.13+** - Core programming language
 
 ## Key Findings
 
@@ -295,7 +298,7 @@ This will:
 
 **Per-Class Performance:**
 - **Low Tips (0-10%):** 78% precision, 36% recall
-- **Middle Tips (10-20%):** 61% precision, 94% recall ⭐
+- **Middle Tips (10-20%):** 61% precision, 94% recall
 - **High Tips (20%+):** 18% precision, 2% recall
 
 **Why This Model Works:**
@@ -304,6 +307,16 @@ This will:
 - Robust to outliers with linear decision boundaries
 - Excellent at identifying the dominant middle-tip class
 
+---
+
+## Troubleshooting
+
+### ⚠️ IMPORTANT: Streamlit Cloud Memory Issues ⚠️
+### Streamlit Cloud Issues
+**"😦 Oh no." Error:**
+If you encounter this error when viewing the app on Streamlit Cloud:
+- This may be due to resource limitations on the free tier.
+- Try running the app locally using `streamlit run streamlit_app.py` after installing dependencies
 ---
 
 ## Author

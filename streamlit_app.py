@@ -172,7 +172,6 @@ def page_overview():
     """)
 
 
-@st.cache_data
 def load_parquet(path: str) -> pd.DataFrame:
     """
     Load Parquet file with caching to improve performance.
@@ -203,7 +202,6 @@ def get_parquet_shape(path: str) -> tuple:
     conn.close()
     return (row_count, len(sample.columns))
 
-@st.cache_data
 def load_parquet_head(path: str, n: int = 10) -> pd.DataFrame:
     """
     Load only the first N rows of a Parquet file using DuckDB for memory efficiency.
@@ -2210,7 +2208,7 @@ if __name__ == "__main__":
     **Course:** CMSE 830 | MSU
 
     **Dataset:** 2024 NYC Taxi + Weather
-    **Records:** 1M+ trips analyzed
+    **Records:** 3M+ trips analyzed
     """)
 
     # Route to appropriate page based on menu selection
