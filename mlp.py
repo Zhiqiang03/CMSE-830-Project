@@ -8,6 +8,8 @@ import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import seaborn as sns
 
+from Project.streamlit_app import load_model
+
 # Set random seed for reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
@@ -15,7 +17,6 @@ np.random.seed(42)
 # Check if GPU is available
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
-
 
 class MLP(nn.Module):
     """Multi-Layer Perceptron for taxi tip classification"""
@@ -49,6 +50,16 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.network(x)
 
+
+def load_mlp_model(model_path, device='cpu') -> MLP:
+    """Load a saved MLP model"""
+    checkpoint = torch.load(model_path, map_location=device)
+    config = checkpoint['model_config']
+    model = MLP(config['input_size'], config['hidden_sizes'], config['num_classes'], config['dropout_rate'])
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.to(device)
+    model.eval()
+    return model
 
 def train_mlp(model, train_loader, val_loader, criterion, optimizer, num_epochs=50, device='cpu'):
     """
@@ -260,7 +271,7 @@ print(f"Number of test batches: {len(test_loader)}\n")
 
 # 3. Model Configuration
 input_size = X_train.shape[1]
-hidden_sizes = [128, 64, 32]  # Three hidden layers
+hidden_sizes = [256, 128, 64, 32]  # Three hidden layers
 num_classes = len(torch.unique(y_train))
 dropout_rate = 0.2
 
@@ -336,4 +347,5 @@ torch.save({
     }
 }, model_path)
 print(f"\nModel saved to {model_path}")
+
 
