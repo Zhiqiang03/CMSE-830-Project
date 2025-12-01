@@ -71,7 +71,7 @@ def page_overview():
     with col2:
         st.markdown("""
         <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; text-align: center; color: white;">
-            <h2 style="margin: 0; color: white; border: none;">7</h2>
+            <h2 style="margin: 0; color: white; border: none;">8</h2>
             <p style="margin: 5px 0; font-size: 0.9em;">ML Models</p>
         </div>
         """, unsafe_allow_html=True)
@@ -105,7 +105,7 @@ def page_overview():
         we predict tip amounts and identify key factors influencing passenger generosity.
         
         **Key Features:**
-        - Multi-model ensemble prediction (66.7% accuracy)
+        - Best single model: Histogram Gradient Boosting (66.68% accuracy)
         - Weather impact analysis on tipping patterns
         - Temporal trends across hours and days
         - Interactive visualizations and insights
@@ -1510,8 +1510,8 @@ def page_interactive_prediction():
     Adjust the parameters below to see how different factors might influence tipping behavior.
     
     **All models will make predictions simultaneously.** Note that:
-    - **Naive Bayes** performs best at predicting **High Tip** class
-    - **SVM (Linear SGD)** performs best at predicting **Middle Tip** class
+    - **Histogram Gradient Boosting** performs best overall and for both **High Tip** and **Middle Tip** classes
+    - **Random Forest** performs best at predicting **Low Tip** class
     """)
 
     # Load available models
@@ -1996,9 +1996,9 @@ def page_interactive_prediction():
             5. Final probabilities are normalized to sum to 100%
 
             **Example from your models:**
-            - **Naive Bayes**: Excellent at High Tips (F1: ~0.59) → Gets high weight for High class
+            - **Hist Gradient Boosting**: Best at High Tips (F1: ~0.72) → Gets high weight for High class
             - **Hist Gradient Boosting**: Best at Middle Tips (F1: ~0.69) → Gets high weight for Middle class
-            - **Random Forest**: Strong at Low Tips (F1: ~0.53) → Gets high weight for Low class
+            - **Random Forest** or **MLP**: Strong at Low Tips (F1: ~0.53) → Gets high weight for Low class
 
             **Benefits:**
             - Leverages each model's strengths
