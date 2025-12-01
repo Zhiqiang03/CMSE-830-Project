@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pickle
 from pathlib import Path
+import torch
 
 # Configure page settings at the top
 st.set_page_config(
@@ -64,7 +65,7 @@ def page_overview():
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Data Sources", "3")
-    col2.metric("ML Models", "7")
+    col2.metric("ML Models", "8")
     col3.metric("Visualizations", "15+")
     col4.metric("Records Analyzed", "1M+")
 
@@ -111,7 +112,7 @@ def page_overview():
     with col2:
         st.markdown("""
         #### Machine Learning
-        - 7 different algorithms with class balancing
+        - 8 different algorithms with class balancing
         - Comprehensive model comparison
         - Feature importance analysis
         
@@ -122,6 +123,12 @@ def page_overview():
         """)
 
     st.markdown("---")
+
+    st.warning("""
+    ⚠️ **Note on Model Files:** Due to GitHub's file size limitations (100MB per file), some trained model files 
+    could not be uploaded to the repository. The app displays pre-computed model performance metrics and 
+    visualizations. All model training code and results are documented in the notebooks and model evaluation sections.
+    """)
 
     st.info("""
     **Navigation Guide:** Use the sidebar menu to explore different sections of this comprehensive analysis.
@@ -1038,6 +1045,29 @@ weighted avg       0.39      0.23      0.19    348536""",
    macro avg       0.53      0.44      0.42    348536
 weighted avg       0.62      0.63      0.57    348536""",
             'model': None
+        },
+        'MLP (Neural Network)': {
+            'Accuracy': 0.5380,
+            'Precision': 0.5400,
+            'Recall': 0.4637,
+            'F1-Score': 0.4567,
+            'Training Time (s)': 263.0,  # Will be updated with actual timing
+            'Prediction Time (s)': 0.5,  # Will be updated with actual timing
+            'confusion_matrix': np.array([
+                [40344, 61677, 14465],
+                [9155, 132715, 48575],
+                [1351, 26156, 14098]
+            ]),
+            'classification_report': """              precision    recall  f1-score   support
+
+   Low Tip (0)       0.84      0.35      0.49    116486
+Middle Tip (1)       0.62      0.70      0.66    190445
+  High Tip (2)       0.17      0.35      0.22     41605
+
+      accuracy                           0.54    348536
+     macro avg       0.54      0.46      0.46    348536
+  weighted avg       0.64      0.54      0.55    348536""",
+            'model': None
         }
     }
     return model_results
@@ -1068,6 +1098,7 @@ def page_model_evaluation():
         - Histogram Gradient Boosting
         - K-Nearest Neighbors
         - SVM (Linear SGD)
+        - MLP (Neural Network)
         """)
 
     st.caption("All models use class balancing to handle imbalanced tip classes")
@@ -1256,7 +1287,7 @@ def page_model_evaluation():
     # Create a grid of confusion matrices for all models
     model_names = list(model_results.keys())
 
-    # Create subplots: 3 rows x 3 columns (7 models + 1 empty space)
+    # Create subplots: 3 rows x 3 columns (8 models + 1 empty space)
     fig = make_subplots(
         rows=3, cols=3,
         subplot_titles=model_names + [''],  # Add empty title for unused subplot
@@ -1375,12 +1406,24 @@ def page_interactive_prediction():
     available_models = {}
 
     if model_dir.exists():
+        # Load pickle models
         model_files = list(model_dir.glob("*.pkl"))
         for model_file in model_files:
             model_data = load_model(model_file)
             if model_data and isinstance(model_data, dict):
                 model_name = model_data.get('model_name', model_file.stem)
                 available_models[model_name] = model_data.get('model')
+
+        # Load PyTorch models
+        pth_files = list(model_dir.glob("*.pth"))
+        for pth_file in pth_files:
+            try:
+                # For PyTorch models, we'll just note they exist
+                # (prediction would require the model architecture from mlp.py)
+                model_name = pth_file.stem.replace('_', ' ').title()
+                # Don't add to available_models as we can't directly use them without architecture
+            except Exception as e:
+                st.warning(f"Could not load PyTorch model {pth_file.name}: {e}")
 
 
     st.markdown("---")

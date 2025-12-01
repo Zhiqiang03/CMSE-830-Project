@@ -9,3 +9,4 @@ plotly
 requests
 beautifulsoup4
 torch
+tqdm
