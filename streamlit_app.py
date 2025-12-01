@@ -1033,8 +1033,8 @@ weighted avg       0.45      0.45      0.45    697072""",
             'Precision': 0.6566,
             'Recall': 0.5773,
             'F1-Score': 0.5800,
-            'Training Time (s)': 450.0,  # Approximate from 15 epochs
-            'Prediction Time (s)': 6.0,   # Approximate from evaluation
+            'Training Time (s)': 1430.0,  # Approximate from 15 epochs
+            'Prediction Time (s)': 1.0,   # Approximate from evaluation
             'confusion_matrix': np.array([
                 [75204, 61337, 62776],
                 [11525, 159999, 55637],
@@ -1530,7 +1530,12 @@ def page_interactive_prediction():
     pth_files = list(model_dir.glob("*.pth"))
     for pth_file in pth_files:
         try:
-            model_name = pth_file.stem.replace('_', ' ').title()
+            # Custom name mapping for better display names
+            if 'mlp' in pth_file.stem.lower():
+                model_name = 'MLP (Neural Network)'
+            else:
+                model_name = pth_file.stem.replace('_', ' ').title()
+
             available_models[model_name] = load_model(pth_file)
         except Exception as e:
             st.warning(f"Could not load PyTorch model {pth_file.name}: {e}")
@@ -1883,7 +1888,6 @@ def page_interactive_prediction():
                 f1_by_class.append(f1)
 
             class_f1_scores[model_name] = f1_by_class
-
         # Calculate weighted predictions using ALL models
         weighted_probs = np.zeros(3)  # [Low, Middle, High]
         total_weights = np.zeros(3)  # Track total weight for each class separately
@@ -2024,11 +2028,6 @@ def page_interactive_prediction():
                 with col:
                     predicted_class = prediction['class']
                     predicted_class_name = prediction['class_name']
-                    probs = prediction['probabilities']
-
-                    # Add special highlighting for NB predicting High and SVM predicting Middle
-                    is_nb_high = ("naive" in model_name.lower() or "bayes" in model_name.lower()) and predicted_class == 2
-                    is_svm_middle = ("svm" in model_name.lower() or "sgd" in model_name.lower()) and predicted_class == 1
 
                     # Determine color based on prediction
                     if predicted_class == 0:
@@ -2038,16 +2037,9 @@ def page_interactive_prediction():
                     else:
                         header_color = "#2ecc71"  # Green for High
 
-                    # Model header with colored background
-                    badge = ""
-                    if is_nb_high:
-                        badge = " (Best for High 🎉)"
-                    elif is_svm_middle:
-                        badge = " (Best for Middle 🎉)"
-
                     st.markdown(f"""
                     <div style="background-color: {header_color}; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-                        <h4 style="margin: 0; color: white;">{model_name}{badge}</h4>
+                        <h4 style="margin: 0; color: white;">{model_name}</h4>
                         <p style="margin: 5px 0 0 0; color: white; font-size: 1.1em; font-weight: bold;">→ {predicted_class_name}</p>
                     </div>
                     """, unsafe_allow_html=True)
