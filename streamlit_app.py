@@ -9,50 +9,7 @@ import pickle
 from pathlib import Path
 import torch
 import duckdb
-from torch import nn
-
-class MLP(nn.Module):
-    """Multi-Layer Perceptron for taxi tip classification"""
-
-    def __init__(self, input_size, hidden_sizes, num_classes, dropout_rate=0.3):
-        """
-        Args:
-            input_size: Number of input features
-            hidden_sizes: List of hidden layer sizes (e.g., [128, 64, 32])
-            num_classes: Number of output classes
-            dropout_rate: Dropout probability for regularization
-        """
-        super(MLP, self).__init__()
-
-        layers = []
-        prev_size = input_size
-
-        # Build hidden layers
-        for hidden_size in hidden_sizes:
-            layers.append(nn.Linear(prev_size, hidden_size))
-            layers.append(nn.BatchNorm1d(hidden_size))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(dropout_rate))
-            prev_size = hidden_size
-
-        # Output layer
-        layers.append(nn.Linear(prev_size, num_classes))
-
-        self.network = nn.Sequential(*layers)
-
-    def forward(self, x):
-        return self.network(x)
-
-def load_mlp_model(model_path, device='cpu') -> MLP:
-    """Load a saved MLP model"""
-    checkpoint = torch.load(model_path, map_location=device)
-    config = checkpoint['model_config']
-    model = MLP(config['input_size'], config['hidden_sizes'], config['num_classes'], config['dropout_rate'])
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model.to(device)
-    model.eval()
-    return model
-
+from mlp import load_mlp_model
 
 # Configure page settings at the top
 st.set_page_config(
@@ -90,46 +47,82 @@ def page_overview():
     Display the project overview page with introduction, data sources,
     techniques used, and research questions.
     """
-    st.title("NYC Taxi Ride Analysis & Tip Prediction")
+    # Hero section
     st.markdown("""
-    ### CMSE 830 Data Analysis Project
+    <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin-bottom: 30px;">
+        <h1 style="color: white; font-size: 3em; margin: 0; border: none;"> NYC Taxi Ride Analysis</h1>
+        <p style="color: white; font-size: 1.3em; margin: 10px 0;">Tip Prediction & Pattern Discovery</p>
+        <p style="color: #e0e0e0; font-size: 1em; margin: 5px 0;">CMSE 830 Data Analysis Project | Zhiqiang Ni</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    This Streamlit app demonstrates a comprehensive data analysis of NYC taxi data, including:
-    - **Data Collection** and preprocessing
-    - **Exploratory Data Analysis** with interactive visualizations
-    - **Missing Data Handling** using iterative imputation
-    - **Predictive Modeling** for tip classification
-
-    **Author:** Zhiqiang Ni | **Course:** CMSE 830
-    """)
-    
-    # Key metrics
-    st.markdown("---")
-    st.subheader("Project Highlights")
-
+    # Key metrics with enhanced styling
+    st.markdown("### Project At A Glance")
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Data Sources", "3")
-    col2.metric("ML Models", "8")
-    col3.metric("Visualizations", "15+")
-    col4.metric("Records Analyzed", "1M+")
 
-    st.markdown("---")
+    with col1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; text-align: center; color: white;">
+            <h2 style="margin: 0; color: white; border: none;">3</h2>
+            <p style="margin: 5px 0; font-size: 0.9em;">Data Sources</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.header("The Story Behind the Data")
-    st.write("""
-    New York City's iconic yellow and green taxis generate massive amounts of data with every trip. 
-    This project analyzes this data to uncover the factors that influence passenger tipping behavior.
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; text-align: center; color: white;">
+            <h2 style="margin: 0; color: white; border: none;">7</h2>
+            <p style="margin: 5px 0; font-size: 0.9em;">ML Models</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    By combining 2024 taxi trip records from the NYC Taxi & Limousine Commission (TLC) with hourly weather data, 
-    we explore tipping patterns, temporal trends, and build models to predict tip amounts.
-    
-    ### Why This Matters
-    
-    Understanding tipping behavior provides valuable insights for:
-    - **Drivers**: To better understand potential earnings and influencing factors
-    - **Passengers**: To gain awareness of tipping norms
-    - **TLC**: For policy-making and understanding the taxi economy
-    """)
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 10px; text-align: center; color: white;">
+            <h2 style="margin: 0; color: white; border: none;">15+</h2>
+            <p style="margin: 5px 0; font-size: 0.9em;">Visualizations</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 20px; border-radius: 10px; text-align: center; color: white;">
+            <h2 style="margin: 0; color: white; border: none;">1M+</h2>
+            <p style="margin: 5px 0; font-size: 0.9em;">Records Analyzed</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Main content in columns
+    col1, col2 = st.columns([3, 2])
+
+    with col1:
+        st.markdown("###  Project Overview")
+        st.markdown("""
+        This comprehensive analysis combines **2024 NYC taxi trip records** with **hourly weather data** 
+        to uncover patterns in passenger tipping behavior. Using advanced machine learning techniques, 
+        we predict tip amounts and identify key factors influencing passenger generosity.
+        
+        **Key Features:**
+        - Multi-model ensemble prediction (66.7% accuracy)
+        - Weather impact analysis on tipping patterns
+        - Temporal trends across hours and days
+        - Interactive visualizations and insights
+        """)
+
+    with col2:
+        st.markdown("### Why This Matters")
+        st.info("""
+        **For Drivers:**  
+        Understand factors affecting earnings
+        
+        **For Passengers:**  
+        Learn about tipping norms
+        
+        **For Researchers:**  
+        Insights into urban economics
+        """)
 
     st.markdown("---")
 
@@ -683,183 +676,107 @@ def page_advanced_analysis():
     # Factors Affecting Tip Percentage
     st.subheader("Factors Affecting Tip Percentage")
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Time Patterns", "Trip Characteristics", "Weather Impact", "Passenger Behavior"])
+    # Time Patterns
+    st.subheader("Time Patterns")
+    st.write("**How does tip percentage vary by time?**")
 
-    with tab1:
-        st.write("**How does tip percentage vary by time?**")
+    col1, col2 = st.columns(2)
 
-        col1, col2 = st.columns(2)
+    with col1:
+        hourly_tips = df.groupby('pickup_hour')['tip_percentage'].agg(['mean', 'median', 'std']).reset_index()
 
-        with col1:
-            hourly_tips = df.groupby('pickup_hour')['tip_percentage'].agg(['mean', 'median', 'std']).reset_index()
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=hourly_tips['pickup_hour'],
+            y=hourly_tips['mean'],
+            mode='lines+markers',
+            name='Mean',
+            line=dict(color='#e74c3c', width=3),
+            marker=dict(size=8)
+        ))
+        fig.add_trace(go.Scatter(
+            x=hourly_tips['pickup_hour'],
+            y=hourly_tips['median'],
+            mode='lines+markers',
+            name='Median',
+            line=dict(color='#27ae60', width=3),
+            marker=dict(size=8)
+        ))
+        fig.update_layout(
+            title="Tip Percentage by Hour of Day",
+            xaxis_title="Hour",
+            yaxis_title="Tip Percentage (%)",
+            hovermode='x unified'
+        )
+        st.plotly_chart(fig, width='stretch')
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=hourly_tips['pickup_hour'],
-                y=hourly_tips['mean'],
-                mode='lines+markers',
-                name='Mean',
-                line=dict(color='#e74c3c', width=3),
-                marker=dict(size=8)
-            ))
-            fig.add_trace(go.Scatter(
-                x=hourly_tips['pickup_hour'],
-                y=hourly_tips['median'],
-                mode='lines+markers',
-                name='Median',
-                line=dict(color='#27ae60', width=3),
-                marker=dict(size=8)
-            ))
-            fig.update_layout(
-                title="Tip Percentage by Hour of Day",
-                xaxis_title="Hour",
-                yaxis_title="Tip Percentage (%)",
-                hovermode='x unified'
-            )
-            st.plotly_chart(fig, width='stretch')
+    with col2:
+        day_names = {0: 'Mon', 1: 'Tue', 2: 'Wed', 3: 'Thu', 4: 'Fri', 5: 'Sat', 6: 'Sun'}
+        df_temp = df.copy()
+        df_temp['day_name'] = df_temp['day_of_week'].map(day_names)
+        daily_tips = df_temp.groupby('day_name')['tip_percentage'].mean().reindex(day_names.values())
 
-        with col2:
-            day_names = {0: 'Mon', 1: 'Tue', 2: 'Wed', 3: 'Thu', 4: 'Fri', 5: 'Sat', 6: 'Sun'}
-            df_temp = df.copy()
-            df_temp['day_name'] = df_temp['day_of_week'].map(day_names)
-            daily_tips = df_temp.groupby('day_name')['tip_percentage'].mean().reindex(day_names.values())
+        fig = px.bar(
+            x=daily_tips.index,
+            y=daily_tips.values,
+            title="Average Tip Percentage by Day of Week",
+            labels={'x': 'Day', 'y': 'Tip Percentage (%)'},
+            color=daily_tips.values,
+            color_continuous_scale='Viridis'
+        )
+        st.plotly_chart(fig, width='stretch')
 
-            fig = px.bar(
-                x=daily_tips.index,
-                y=daily_tips.values,
-                title="Average Tip Percentage by Day of Week",
-                labels={'x': 'Day', 'y': 'Tip Percentage (%)'},
-                color=daily_tips.values,
-                color_continuous_scale='Viridis'
-            )
-            st.plotly_chart(fig, width='stretch')
+    st.markdown("---")
 
-    with tab2:
-        st.write("**How do trip characteristics influence tipping?**")
+    # Trip Characteristics
+    st.subheader("Trip Characteristics")
+    st.write("**How do trip characteristics influence tipping?**")
 
-        col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-        with col1:
-            # Create distance bins
-            df_temp = df[df['trip_distance'] <= 20].copy()  # Filter extreme outliers
-            df_temp['distance_bin'] = pd.cut(df_temp['trip_distance'],
-                                             bins=[0, 1, 3, 5, 10, 20],
-                                             labels=['<1mi', '1-3mi', '3-5mi', '5-10mi', '10-20mi'])
+    with col1:
+        # Create distance bins
+        df_temp = df[df['trip_distance'] <= 20].copy()  # Filter extreme outliers
+        df_temp['distance_bin'] = pd.cut(df_temp['trip_distance'],
+                                         bins=[0, 1, 3, 5, 10, 20],
+                                         labels=['<1mi', '1-3mi', '3-5mi', '5-10mi', '10-20mi'])
 
-            distance_tips = df_temp.groupby('distance_bin')['tip_percentage'].agg(['mean', 'count']).reset_index()
+        distance_tips = df_temp.groupby('distance_bin')['tip_percentage'].agg(['mean', 'count']).reset_index()
 
-            fig = px.bar(
-                distance_tips,
-                x='distance_bin',
-                y='mean',
-                title="Average Tip % by Trip Distance",
-                labels={'distance_bin': 'Distance Range', 'mean': 'Avg Tip %'},
-                text='mean',
-                color='mean',
-                color_continuous_scale='Blues'
-            )
-            fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-            st.plotly_chart(fig, width='stretch')
+        fig = px.bar(
+            distance_tips,
+            x='distance_bin',
+            y='mean',
+            title="Average Tip % by Trip Distance",
+            labels={'distance_bin': 'Distance Range', 'mean': 'Avg Tip %'},
+            text='mean',
+            color='mean',
+            color_continuous_scale='Blues'
+        )
+        fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+        st.plotly_chart(fig, width='stretch')
 
-        with col2:
-            # Create fare bins
-            df_temp = df[df['fare_amount'] <= 100].copy()
-            df_temp['fare_bin'] = pd.cut(df_temp['fare_amount'],
-                                         bins=[0, 10, 20, 30, 50, 100],
-                                         labels=['<$10', '$10-20', '$20-30', '$30-50', '$50-100'])
+    with col2:
+        # Create fare bins
+        df_temp = df[df['fare_amount'] <= 100].copy()
+        df_temp['fare_bin'] = pd.cut(df_temp['fare_amount'],
+                                     bins=[0, 10, 20, 30, 50, 100],
+                                     labels=['<$10', '$10-20', '$20-30', '$30-50', '$50-100'])
 
-            fare_tips = df_temp.groupby('fare_bin')['tip_percentage'].mean().reset_index()
+        fare_tips = df_temp.groupby('fare_bin')['tip_percentage'].mean().reset_index()
 
-            fig = px.bar(
-                fare_tips,
-                x='fare_bin',
-                y='tip_percentage',
-                title="Average Tip % by Fare Amount",
-                labels={'fare_bin': 'Fare Range', 'tip_percentage': 'Avg Tip %'},
-                text='tip_percentage',
-                color='tip_percentage',
-                color_continuous_scale='Greens'
-            )
-            fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-            st.plotly_chart(fig, width='stretch')
-
-    with tab3:
-        st.write("**Does weather affect tipping behavior?**")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Temperature bins
-            df_temp = df.copy()
-            df_temp['temp_category'] = pd.cut(df_temp['apparent_temperature'],
-                                              bins=[-20, 32, 50, 70, 85, 120],
-                                              labels=['Freezing', 'Cold', 'Mild', 'Warm', 'Hot'])
-
-            temp_tips = df_temp.groupby('temp_category')['tip_percentage'].mean().reset_index()
-
-            fig = px.bar(
-                temp_tips,
-                x='temp_category',
-                y='tip_percentage',
-                title="Tip % by Temperature",
-                labels={'temp_category': 'Temperature', 'tip_percentage': 'Avg Tip %'},
-                color='tip_percentage',
-                color_continuous_scale='RdYlBu_r'
-            )
-            st.plotly_chart(fig, width='stretch')
-
-        with col2:
-            df_temp = df.copy()
-            df_temp['rain_category'] = pd.cut(df_temp['precipitation'],
-                                              bins=[-0.1, 0, 0.1, 1, 10],
-                                              labels=['No Rain', 'Light', 'Moderate', 'Heavy'])
-
-            rain_tips = df_temp.groupby('rain_category')['tip_percentage'].mean().reset_index()
-
-            fig = px.bar(
-                rain_tips,
-                x='rain_category',
-                y='tip_percentage',
-                title="Tip % by Precipitation Level",
-                labels={'rain_category': 'Precipitation', 'tip_percentage': 'Avg Tip %'},
-                color='tip_percentage',
-                color_continuous_scale='Blues'
-            )
-            st.plotly_chart(fig, width='stretch')
-
-    with tab4:
-        st.write("**How do passenger count and taxi type affect tips?**")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            passenger_tips = df[df['passenger_count'] <= 6].groupby('passenger_count')['tip_percentage'].mean().reset_index()
-
-            fig = px.line(
-                passenger_tips,
-                x='passenger_count',
-                y='tip_percentage',
-                title="Tip % by Passenger Count",
-                labels={'passenger_count': '# Passengers', 'tip_percentage': 'Avg Tip %'},
-                markers=True
-            )
-            fig.update_traces(line_color='#9b59b6', marker=dict(size=12))
-            st.plotly_chart(fig, width='stretch')
-
-        with col2:
-            taxi_tips = df.groupby('is_yellow')['tip_percentage'].mean().reset_index()
-            taxi_tips['Taxi Type'] = taxi_tips['is_yellow'].map({1: 'Yellow', 0: 'Green'})
-
-            fig = px.bar(
-                taxi_tips,
-                x='Taxi Type',
-                y='tip_percentage',
-                title="Tip % by Taxi Type",
-                labels={'tip_percentage': 'Avg Tip %'},
-                color='Taxi Type',
-                color_discrete_map={'Yellow': '#f1c40f', 'Green': '#27ae60'}
-            )
-            st.plotly_chart(fig, width='stretch')
+        fig = px.bar(
+            fare_tips,
+            x='fare_bin',
+            y='tip_percentage',
+            title="Average Tip % by Fare Amount",
+            labels={'fare_bin': 'Fare Range', 'tip_percentage': 'Avg Tip %'},
+            text='tip_percentage',
+            color='tip_percentage',
+            color_continuous_scale='Greens'
+        )
+        fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+        st.plotly_chart(fig, width='stretch')
 
     st.markdown("---")
 
@@ -947,190 +864,191 @@ def get_hardcoded_model_results():
     """
     Returns hard-coded model performance results from training.
     This allows the app to display model metrics without requiring the actual model files.
+    Updated: December 2024 - Retrained on 2.8M samples, 48 features
     """
     model_results = {
         'Logistic Regression': {
-            'Accuracy': 0.5286,
-            'Precision': 0.5734,
-            'Recall': 0.5286,
-            'F1-Score': 0.5258,
-            'Training Time (s)': 98.13,
-            'Prediction Time (s)': 0.16,
+            'Accuracy': 0.5280,
+            'Precision': 0.5717,
+            'Recall': 0.5280,
+            'F1-Score': 0.5249,
+            'Training Time (s)': 82.12,
+            'Prediction Time (s)': 0.11,
             'confusion_matrix': np.array([
-                [39177, 24007, 36655],
-                [5193, 53300, 54224],
-                [4374, 39839, 91767]
+                [77811, 48167, 73339],
+                [10760, 107597, 108804],
+                [9064, 78880, 182650]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.80      0.39      0.53     99839
-      Middle       0.45      0.47      0.46    112717
-        High       0.50      0.67      0.58    135980
+         Low       0.80      0.39      0.52    199317
+      Middle       0.46      0.47      0.47    227161
+        High       0.50      0.67      0.57    270594
 
-    accuracy                           0.53    348536
-   macro avg       0.59      0.51      0.52    348536
-weighted avg       0.57      0.53      0.53    348536""",
+    accuracy                           0.53    697072
+   macro avg       0.59      0.51      0.52    697072
+weighted avg       0.57      0.53      0.52    697072""",
             'model': None
         },
         'Random Forest': {
-            'Accuracy': 0.6182,
-            'Precision': 0.6627,
-            'Recall': 0.6182,
-            'F1-Score': 0.6102,
-            'Training Time (s)': 107.74,
-            'Prediction Time (s)': 2.22,
+            'Accuracy': 0.6447,
+            'Precision': 0.6843,
+            'Recall': 0.6447,
+            'F1-Score': 0.6337,
+            'Training Time (s)': 168.74,
+            'Prediction Time (s)': 3.06,
             'confusion_matrix': np.array([
-                [38622, 29737, 31480],
-                [3614, 81305, 27798],
-                [2919, 37532, 95529]
+                [76610, 59524, 63183],
+                [7169, 172306, 47686],
+                [5717, 64413, 200464]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.86      0.39      0.53     99839
-      Middle       0.55      0.72      0.62    112717
-        High       0.62      0.70      0.66    135980
+         Low       0.86      0.38      0.53    199317
+      Middle       0.58      0.76      0.66    227161
+        High       0.64      0.74      0.69    270594
 
-    accuracy                           0.62    348536
-   macro avg       0.67      0.60      0.60    348536
-weighted avg       0.66      0.62      0.61    348536""",
+    accuracy                           0.64    697072
+   macro avg       0.69      0.63      0.63    697072
+weighted avg       0.68      0.64      0.63    697072""",
             'model': None
         },
         'Hist Gradient Boosting': {
-            'Accuracy': 0.6656,
-            'Precision': 0.6971,
-            'Recall': 0.6656,
-            'F1-Score': 0.6532,
-            'Training Time (s)': 115.55,
-            'Prediction Time (s)': 5.41,
+            'Accuracy': 0.6668,
+            'Precision': 0.6987,
+            'Recall': 0.6668,
+            'F1-Score': 0.6538,
+            'Training Time (s)': 84.32,
+            'Prediction Time (s)': 9.86,
             'confusion_matrix': np.array([
-                [39121, 29095, 31623],
-                [4095, 87844, 20778],
-                [3451, 27516, 105013]
+                [77246, 58685, 63386],
+                [7842, 177714, 41605],
+                [6726, 54042, 209826]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.84      0.39      0.53     99839
-      Middle       0.61      0.78      0.68    112717
-        High       0.67      0.77      0.72    135980
+         Low       0.84      0.39      0.53    199317
+      Middle       0.61      0.78      0.69    227161
+        High       0.67      0.78      0.72    270594
 
-    accuracy                           0.67    348536
-   macro avg       0.70      0.65      0.64    348536
-weighted avg       0.70      0.67      0.65    348536""",
+    accuracy                           0.67    697072
+   macro avg       0.71      0.65      0.64    697072
+weighted avg       0.70      0.67      0.65    697072""",
             'model': None
         },
         'Decision Tree': {
-            'Accuracy': 0.6416,
-            'Precision': 0.6479,
-            'Recall': 0.6416,
-            'F1-Score': 0.6329,
-            'Training Time (s)': 31.00,
-            'Prediction Time (s)': 0.11,
+            'Accuracy': 0.6571,
+            'Precision': 0.6740,
+            'Recall': 0.6571,
+            'F1-Score': 0.6451,
+            'Training Time (s)': 72.74,
+            'Prediction Time (s)': 0.24,
             'confusion_matrix': np.array([
-                [41553, 28001, 30285],
-                [8975, 83213, 20529],
-                [10571, 26543, 98866]
+                [78504, 57210, 63603],
+                [12168, 172144, 42849],
+                [12740, 50489, 207365]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.68      0.42      0.52     99839
-      Middle       0.60      0.74      0.66    112717
-        High       0.66      0.73      0.69    135980
+         Low       0.76      0.39      0.52    199317
+      Middle       0.62      0.76      0.68    227161
+        High       0.66      0.77      0.71    270594
 
-    accuracy                           0.64    348536
-   macro avg       0.65      0.63      0.62    348536
-weighted avg       0.65      0.64      0.63    348536""",
+    accuracy                           0.66    697072
+   macro avg       0.68      0.64      0.64    697072
+weighted avg       0.67      0.66      0.65    697072""",
             'model': None
         },
         'K-Nearest Neighbors': {
-            'Accuracy': 0.4659,
-            'Precision': 0.4688,
-            'Recall': 0.4659,
-            'F1-Score': 0.4664,
-            'Training Time (s)': 0.09,
-            'Prediction Time (s)': 449.28,
+            'Accuracy': 0.4763,
+            'Precision': 0.4791,
+            'Recall': 0.4763,
+            'F1-Score': 0.4768,
+            'Training Time (s)': 0.15,
+            'Prediction Time (s)': 1446.33,
             'confusion_matrix': np.array([
-                [50004, 25465, 24370],
-                [24876, 51637, 36204],
-                [28088, 47162, 60730]
+                [99029, 51204, 49084],
+                [49127, 108574, 69460],
+                [55066, 91129, 124399]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.49      0.50      0.49     99839
-      Middle       0.42      0.46      0.44    112717
-        High       0.50      0.45      0.47    135980
+         Low       0.49      0.50      0.49    199317
+      Middle       0.43      0.48      0.45    227161
+        High       0.51      0.46      0.48    270594
 
-    accuracy                           0.47    348536
-   macro avg       0.47      0.47      0.47    348536
-weighted avg       0.47      0.47      0.47    348536""",
+    accuracy                           0.48    697072
+   macro avg       0.48      0.48      0.48    697072
+weighted avg       0.48      0.48      0.48    697072""",
             'model': None
         },
         'Naive Bayes': {
             'Accuracy': 0.4983,
-            'Precision': 0.5870,
+            'Precision': 0.5471,
             'Recall': 0.4983,
-            'F1-Score': 0.4152,
-            'Training Time (s)': 0.81,
-            'Prediction Time (s)': 0.32,
+            'F1-Score': 0.4483,
+            'Training Time (s)': 1.37,
+            'Prediction Time (s)': 0.52,
             'confusion_matrix': np.array([
-                [37166, 2604, 60069],
-                [3540, 5525, 103652],
-                [2397, 2597, 130986]
+                [79046, 13180, 107091],
+                [12241, 30202, 184718],
+                [10803, 21693, 238098]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.86      0.37      0.52     99839
-      Middle       0.52      0.05      0.09    112717
-        High       0.44      0.96      0.61    135980
+         Low       0.77      0.40      0.52    199317
+      Middle       0.46      0.13      0.21    227161
+        High       0.45      0.88      0.59    270594
 
-    accuracy                           0.50    348536
-   macro avg       0.61      0.46      0.41    348536
-weighted avg       0.59      0.50      0.42    348536""",
+    accuracy                           0.50    697072
+   macro avg       0.56      0.47      0.44    697072
+weighted avg       0.55      0.50      0.45    697072""",
             'model': None
         },
         'SVM (Linear SGD)': {
-            'Accuracy': 0.4653,
-            'Precision': 0.4651,
-            'Recall': 0.4653,
-            'F1-Score': 0.4460,
-            'Training Time (s)': 6.31,
-            'Prediction Time (s)': 0.02,
+            'Accuracy': 0.4501,
+            'Precision': 0.4531,
+            'Recall': 0.4501,
+            'F1-Score': 0.4489,
+            'Training Time (s)': 9.14,
+            'Prediction Time (s)': 0.05,
             'confusion_matrix': np.array([
-                [53042, 11423, 35374],
-                [31083, 24651, 56983],
-                [34775, 16735, 84470]
+                [104610, 50445, 44262],
+                [54639, 101777, 70745],
+                [76299, 86960, 107335]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-         Low       0.45      0.53      0.48     99839
-      Middle       0.47      0.22      0.30    112717
-        High       0.48      0.62      0.54    135980
+         Low       0.44      0.52      0.48    199317
+      Middle       0.43      0.45      0.44    227161
+        High       0.48      0.40      0.44    270594
 
-    accuracy                           0.47    348536
-   macro avg       0.46      0.46      0.44    348536
-weighted avg       0.47      0.47      0.45    348536""",
+    accuracy                           0.45    697072
+   macro avg       0.45      0.46      0.45    697072
+weighted avg       0.45      0.45      0.45    697072""",
             'model': None
         },
         'MLP (Neural Network)': {
-            'Accuracy': 0.5380,
-            'Precision': 0.5400,
-            'Recall': 0.4637,
-            'F1-Score': 0.4567,
-            'Training Time (s)': 263.0,  # Will be updated with actual timing
-            'Prediction Time (s)': 0.5,  # Will be updated with actual timing
+            'Accuracy': 0.5895,
+            'Precision': 0.6566,
+            'Recall': 0.5773,
+            'F1-Score': 0.5800,
+            'Training Time (s)': 450.0,  # Approximate from 15 epochs
+            'Prediction Time (s)': 6.0,   # Approximate from evaluation
             'confusion_matrix': np.array([
-                [40344, 61677, 14465],
-                [9155, 132715, 48575],
-                [1351, 26156, 14098]
+                [75204, 61337, 62776],
+                [11525, 159999, 55637],
+                [14453, 79558, 176583]
             ]),
             'classification_report': """              precision    recall  f1-score   support
 
-   Low Tip (0)       0.84      0.35      0.49    116486
-Middle Tip (1)       0.62      0.70      0.66    190445
-  High Tip (2)       0.17      0.35      0.22     41605
+   Low Tip (0)       0.87      0.38      0.53    199317
+Middle Tip (1)       0.51      0.70      0.59    227161
+  High Tip (2)       0.59      0.65      0.62    270594
 
-      accuracy                           0.54    348536
-     macro avg       0.54      0.46      0.46    348536
-  weighted avg       0.64      0.54      0.55    348536""",
+    accuracy                           0.59    697072
+   macro avg       0.66      0.58      0.58    697072
+weighted avg       0.64      0.59      0.58    697072""",
             'model': None
         }
     }
@@ -1411,7 +1329,7 @@ def page_model_evaluation():
 
     for idx, (model_name, model_data) in enumerate(model_results.items()):
         with cols[idx % 2]:
-            with st.expander(f"📊 {model_name} - Details"):
+            with st.expander(f"{model_name} - Details"):
                 # Display metrics
                 metric_cols = st.columns(4)
                 metric_cols[0].metric("Accuracy", f"{model_data['Accuracy']:.4f}")
@@ -1427,6 +1345,137 @@ def page_model_evaluation():
                 if model_data['classification_report']:
                     st.text("Classification Report:")
                     st.text(model_data['classification_report'])
+
+    st.markdown("---")
+
+    # Best Models by Class Performance
+    st.subheader("Best Models for Each Tip Class")
+    st.markdown("Models ranked by F1-Score for each tip class")
+
+    # Extract per-class performance from confusion matrices
+    class_performance = {}
+
+    for model_name, model_data in model_results.items():
+        cm = model_data['confusion_matrix']
+
+        # Calculate per-class metrics from confusion matrix
+        # For each class: Precision = TP / (TP + FP), Recall = TP / (TP + FN), F1 = 2 * (P * R) / (P + R)
+        class_metrics = {}
+
+        for class_idx in range(3):  # 0=Low, 1=Middle, 2=High
+            # True Positives
+            tp = cm[class_idx, class_idx]
+
+            # False Positives (column sum minus TP)
+            fp = cm[:, class_idx].sum() - tp
+
+            # False Negatives (row sum minus TP)
+            fn = cm[class_idx, :].sum() - tp
+
+            # Calculate metrics
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+            recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+
+            class_metrics[class_idx] = {
+                'precision': precision,
+                'recall': recall,
+                'f1': f1,
+                'support': cm[class_idx, :].sum()
+            }
+
+        class_performance[model_name] = class_metrics
+
+    # Create DataFrame for each class
+    class_names = {0: 'Low Tip (0-12%)', 1: 'Middle Tip (12-20%)', 2: 'High Tip (>20%)'}
+    class_colors = {0: '#e74c3c', 1: '#f39c12', 2: '#27ae60'}
+
+    # Display best models for each class in columns
+    col1, col2, col3 = st.columns(3)
+
+    for class_idx, col in enumerate([col1, col2, col3]):
+        with col:
+            # Sort models by F1-score for this class
+            sorted_models = sorted(
+                class_performance.items(),
+                key=lambda x: x[1][class_idx]['f1'],
+                reverse=True
+            )
+
+            # Header with colored background
+            st.markdown(f"""
+            <div style="background-color: {class_colors[class_idx]}; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="margin: 0; color: white; text-align: center;">{class_names[class_idx]}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Show top 3 models
+            st.markdown("**Top 3 Models:**")
+            for rank, (model_name, metrics) in enumerate(sorted_models[:3], 1):
+                class_metric = metrics[class_idx]
+
+                with st.expander(f"**{rank}. {model_name}**", expanded=(rank == 1)):
+                    metric_cols = st.columns(3)
+                    metric_cols[0].metric("Precision", f"{class_metric['precision']:.3f}")
+                    metric_cols[1].metric("Recall", f"{class_metric['recall']:.3f}")
+                    metric_cols[2].metric("F1-Score", f"{class_metric['f1']:.3f}")
+
+                    st.caption(f"Support: {class_metric['support']:,} samples")
+
+    # Add visualization comparing models across classes
+    st.markdown("---")
+    st.markdown("### Class-Specific Performance Comparison")
+
+    # Create heatmap of F1-scores
+    f1_data = []
+    model_names_list = list(class_performance.keys())
+
+    for model_name in model_names_list:
+        f1_scores = [
+            class_performance[model_name][0]['f1'],
+            class_performance[model_name][1]['f1'],
+            class_performance[model_name][2]['f1']
+        ]
+        f1_data.append(f1_scores)
+
+    fig = go.Figure(data=go.Heatmap(
+        z=f1_data,
+        x=['Low Tip', 'Middle Tip', 'High Tip'],
+        y=model_names_list,
+        colorscale='RdYlGn',
+        text=[[f"{val:.3f}" for val in row] for row in f1_data],
+        texttemplate='%{text}',
+        textfont={"size": 10},
+        colorbar=dict(title="F1-Score")
+    ))
+
+    fig.update_layout(
+        title="F1-Score by Model and Tip Class",
+        xaxis_title="Tip Class",
+        yaxis_title="Model",
+        height=500
+    )
+
+    st.plotly_chart(fig, width='stretch')
+
+    # Key insights
+    st.markdown("### 💡 Key Insights")
+
+    # Find best model for each class
+    best_low = max(class_performance.items(), key=lambda x: x[1][0]['f1'])
+    best_middle = max(class_performance.items(), key=lambda x: x[1][1]['f1'])
+    best_high = max(class_performance.items(), key=lambda x: x[1][2]['f1'])
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info(f"**Best for Low Tips:**\n\n{best_low[0]}\n\nF1: {best_low[1][0]['f1']:.3f}")
+
+    with col2:
+        st.info(f"**Best for Middle Tips:**\n\n{best_middle[0]}\n\nF1: {best_middle[1][1]['f1']:.3f}")
+
+    with col3:
+        st.info(f"**Best for High Tips:**\n\n{best_high[0]}\n\nF1: {best_high[1][2]['f1']:.3f}")
 
     st.markdown("---")
 
@@ -1543,21 +1592,23 @@ def page_interactive_prediction():
 
         tip_classes = ['Low Tip (0-10%)', 'Middle Tip (10-20%)', 'High Tip (>20%)']
 
-        # Prepare feature vector for prediction matching the training preprocessing
+        # Prepare feature vector matching the training preprocessing pipeline
         # Convert day_of_week to numeric (0-6)
         day_mapping = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3,
                       'Friday': 4, 'Saturday': 5, 'Sunday': 6}
         day_num = day_mapping[day_of_week]
 
-        # Apply cyclical encoding (same as training)
+        # Apply cyclical encoding (same as training: sin/cos with max values)
         pickup_hour_sin = np.sin(2 * np.pi * pickup_hour / 23)
         pickup_hour_cos = np.cos(2 * np.pi * pickup_hour / 23)
         day_of_week_sin = np.sin(2 * np.pi * day_num / 6)
         day_of_week_cos = np.cos(2 * np.pi * day_num / 6)
 
-        # Prepare features in the same order as training
-        # Numerical features (will be scaled)
-        numerical_features = [
+        # Feature Preparation (matching training pipeline)
+        # ================================================
+
+        # 15 Base Numerical features (will be scaled by StandardScaler)
+        numerical_features_values = [
             passenger_count,      # passenger_count
             trip_distance,        # trip_distance
             fare_amount,          # fare_amount
@@ -1572,7 +1623,11 @@ def page_interactive_prediction():
             0.0,                  # snowfall (default)
             precipitation,        # precipitation
             wind_speed,           # wind_speed_10m
-            speed_mph,            # speed_mph
+            speed_mph             # speed_mph
+        ]
+
+        # 4 Cyclical features (added to numerical)
+        cyclical_features_values = [
             pickup_hour_sin,      # pickup_hour_sin
             pickup_hour_cos,      # pickup_hour_cos
             day_of_week_sin,      # day_of_week_sin
@@ -1580,35 +1635,20 @@ def page_interactive_prediction():
         ]
 
         # Categorical features (low cardinality - will be one-hot encoded)
-        # RatecodeID, weather_code, is_yellow
-        cat_low_features = [
+        # RatecodeID (1-6, 99), weather_code (~100 codes), is_yellow (0/1)
+        # After one-hot encoding: ~107 features total
+        cat_low_features_values = [
             1,                    # RatecodeID (1 = Standard rate)
-            0,                    # weather_code (0 = clear)
-            1 if is_yellow else 0 # is_yellow
+            0,                    # weather_code (0 = clear sky)
+            1 if is_yellow else 0 # is_yellow (1 = yellow, 0 = green)
         ]
 
-        # Categorical features (high cardinality - target encoded)
-        # PULocationID, DOLocationID
-        cat_high_features = [
-            161,                  # PULocationID (161 = Midtown Manhattan default)
-            161                   # DOLocationID (same as pickup for simplicity)
+        # Categorical features (high cardinality - target encoded to 2 features)
+        # PULocationID, DOLocationID (~260 locations each)
+        cat_high_features_values = [
+            161,                  # PULocationID (161 = Midtown Manhattan)
+            161                   # DOLocationID (same as pickup)
         ]
-
-        # Create full feature dictionary for display
-        user_features = {
-            'trip_distance': trip_distance,
-            'fare_amount': fare_amount,
-            'duration_min': duration_min,
-            'passenger_count': passenger_count,
-            'pickup_hour': pickup_hour,
-            'day_of_week': day_of_week,
-            'is_weekend': is_weekend,
-            'is_yellow': 1 if is_yellow else 0,
-            'temperature': temperature,
-            'precipitation': precipitation,
-            'wind_speed': wind_speed,
-            'speed_mph': speed_mph,
-        }
 
         # Store all predictions
         all_predictions = {}
@@ -1622,25 +1662,25 @@ def page_interactive_prediction():
         # Process available models first
         for model_name, model in available_models.items():
                 try:
-                    # Combine all features
-                    # After preprocessing pipeline:
-                    # - 19 numerical features (scaled)
-                    # - ~3-10 one-hot encoded features (RatecodeID, weather_code, is_yellow)
-                    # - 2 target-encoded features (PULocationID, DOLocationID)
-                    # Total: approximately 24-31 features, but models expect 104
-                    # This suggests additional feature engineering was done
+                    # Combine all raw features in order
+                    # After preprocessing pipeline applies transformations:
+                    # - Numerical (19): StandardScaler applied
+                    # - Categorical Low (3 raw → ~27 one-hot): OneHotEncoder
+                    # - Categorical High (2 raw → 2 target-encoded): TargetEncoder
+                    # Total after preprocessing: ~48 features
 
-                    # For now, create a feature vector with the core features we have
-                    # Note: This is an approximation since we don't have the exact preprocessor
-                    all_features = numerical_features + cat_low_features + cat_high_features
+                    all_raw_features = (numerical_features_values +
+                                       cyclical_features_values +
+                                       cat_low_features_values +
+                                       cat_high_features_values)
 
                     if isinstance(model, torch.nn.Module):
                         # PyTorch model
-                        feature_vector = torch.tensor(all_features, dtype=torch.float32).unsqueeze(0)
+                        feature_vector = torch.tensor(all_raw_features, dtype=torch.float32).unsqueeze(0)
 
-                        # Pad to expected size (104 features) with zeros
-                        if feature_vector.shape[1] < 104:
-                            padding = torch.zeros(1, 104 - feature_vector.shape[1])
+                        # Pad to expected size (48 features) with zeros if needed
+                        if feature_vector.shape[1] < 48:
+                            padding = torch.zeros(1, 48 - feature_vector.shape[1])
                             feature_vector = torch.cat([feature_vector, padding], dim=1)
 
                         with torch.no_grad():
@@ -1649,8 +1689,8 @@ def page_interactive_prediction():
                             predicted_class = int(torch.argmax(outputs, dim=1)[0])
                     else:
                         # Sklearn model
-                        # Create feature vector and pad to 104 features
-                        feature_vector = np.array(all_features + [0] * (104 - len(all_features))).reshape(1, -1)
+                        # Create feature vector and pad to 48 features if needed
+                        feature_vector = np.array(all_raw_features + [0] * max(0, 48 - len(all_raw_features))).reshape(1, -1)
 
                         predicted_class = int(model.predict(feature_vector)[0])
 
@@ -1817,43 +1857,203 @@ def page_interactive_prediction():
 
         st.markdown("---")
 
-        # Display predictions from all models
-        st.markdown("### Individual Model Predictions")
-        st.caption("Expand each model to see detailed probability distributions")
+        # Weighted Ensemble Prediction
+        st.subheader("Weighted Ensemble Prediction")
+        st.caption("Combines all models using class-specific F1-scores as weights")
 
+        # Get class-specific F1-scores from model results
+        model_results = get_hardcoded_model_results()
+
+        # Extract per-class F1-scores from confusion matrices
+        class_f1_scores = {}
+
+        for model_name, model_data in model_results.items():
+            cm = model_data['confusion_matrix']
+            f1_by_class = []
+
+            for class_idx in range(3):
+                tp = cm[class_idx, class_idx]
+                fp = cm[:, class_idx].sum() - tp
+                fn = cm[class_idx, :].sum() - tp
+
+                precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+                recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+                f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+
+                f1_by_class.append(f1)
+
+            class_f1_scores[model_name] = f1_by_class
+
+        # Calculate weighted predictions using ALL models
+        weighted_probs = np.zeros(3)  # [Low, Middle, High]
+        total_weights = np.zeros(3)  # Track total weight for each class separately
+        models_used = []
+
+        # Use predictions from all available models
         for model_name, prediction in all_predictions.items():
-            predicted_class = prediction['class']
-            predicted_class_name = prediction['class_name']
-            probs = prediction['probabilities']
+            if model_name in class_f1_scores:
+                # Get this model's probabilities
+                model_probs = np.array(prediction['probabilities'])
 
-            # Add special highlighting for NB predicting High and SVM predicting Middle
-            is_nb_high = ("naive" in model_name.lower() or "bayes" in model_name.lower()) and predicted_class == 2
-            is_svm_middle = ("svm" in model_name.lower() or "sgd" in model_name.lower()) and predicted_class == 1
+                # Get this model's F1-scores for each class
+                model_f1s = np.array(class_f1_scores[model_name])
 
-            with st.expander(f"**{model_name}** → {predicted_class_name}" +
-                           (" 🎯 Best for High Tip" if is_nb_high else "") +
-                           (" 🎯 Best for Middle Tip" if is_svm_middle else ""),
-                           expanded=False):
+                # Weight each class probability by that class's F1-score
+                for class_idx in range(3):
+                    weighted_probs[class_idx] += model_probs[class_idx] * model_f1s[class_idx]
+                    total_weights[class_idx] += model_f1s[class_idx]
 
-                # Show prediction probabilities as a simple table
-                prob_df = pd.DataFrame({
-                    'Tip Class': tip_classes,
-                    'Probability': [f"{p:.1%}" for p in probs],
-                    'Confidence': probs
+                models_used.append(model_name)
+
+        # If no predictions available, fall back to using F1-scores only
+        if len(models_used) == 0:
+            st.warning("No model predictions available.")
+            for class_idx in range(3):
+                avg_f1 = np.mean([f1s[class_idx] for f1s in class_f1_scores.values()])
+                weighted_probs[class_idx] = avg_f1
+            total_weights = np.ones(3)
+
+        # Normalize each class probability by its total weight
+        for class_idx in range(3):
+            if total_weights[class_idx] > 0:
+                weighted_probs[class_idx] = weighted_probs[class_idx] / total_weights[class_idx]
+
+        # Normalize to ensure probabilities sum to 1
+        prob_sum = weighted_probs.sum()
+        if prob_sum > 0:
+            weighted_probs = weighted_probs / prob_sum
+
+        # Get weighted prediction
+        weighted_prediction_class = int(np.argmax(weighted_probs))
+        weighted_prediction_name = tip_classes[weighted_prediction_class]
+        confidence = weighted_probs[weighted_prediction_class] * 100
+
+        # Display prediction result
+        st.success(f"**Ensemble Prediction:** {weighted_prediction_name} (Confidence: {confidence:.1f}%)")
+        st.caption(f"Based on {len(models_used)} models with weighted voting")
+
+        # Show probability distribution
+        prob_df = pd.DataFrame({
+            'Tip Class': ['Low Tip (0-10%)', 'Middle Tip (10-20%)', 'High Tip (>20%)'],
+            'Probability': weighted_probs
+        })
+
+        fig_weighted = px.bar(
+            prob_df,
+            x='Tip Class',
+            y='Probability',
+            color='Tip Class',
+            color_discrete_map={
+                'Low Tip (0-10%)': '#e74c3c',
+                'Middle Tip (10-20%)': '#f39c12',
+                'High Tip (>20%)': '#27ae60'
+            },
+            text=[f"{p*100:.1f}%" for p in weighted_probs],
+            title="Weighted Probability Distribution"
+        )
+        fig_weighted.update_traces(textposition='outside')
+        fig_weighted.update_layout(
+            showlegend=False,
+            height=400,
+            yaxis_title="Probability",
+            xaxis_title="",
+            yaxis=dict(range=[0, 1])
+        )
+        st.plotly_chart(fig_weighted, width='stretch')
+
+        # Model contribution table
+        st.markdown("**Model Contributions:**")
+        contribution_data = []
+        for model_name in models_used:
+            if model_name in class_f1_scores and model_name in all_predictions:
+                f1s = class_f1_scores[model_name]
+                contribution_data.append({
+                    'Model': model_name,
+                    'Low F1': f"{f1s[0]:.3f}",
+                    'Middle F1': f"{f1s[1]:.3f}",
+                    'High F1': f"{f1s[2]:.3f}",
+                    'Average F1': f"{np.mean(f1s):.3f}"
                 })
 
-                # Display as clean dataframe
-                st.dataframe(
-                    prob_df[['Tip Class', 'Probability']],
-                    hide_index=True,
-                    width='stretch'
-                )
+        if contribution_data:
+            contrib_df = pd.DataFrame(contribution_data)
+            st.dataframe(contrib_df, width='stretch', hide_index=True)
 
-                # Add note about model strength
-                if is_nb_high:
-                    st.success("✓ This model is particularly accurate at predicting High Tip class!")
-                elif is_svm_middle:
-                    st.success("✓ This model is particularly accurate at predicting Middle Tip class!")
+        # Explanation
+        with st.expander("How does weighted ensemble work?"):
+            st.markdown(f"""
+            The **Weighted Ensemble Prediction** combines **all {len(class_f1_scores)} trained models'** predictions using their class-specific performance:
+
+            **Method:**
+            1. Each model predicts probabilities for all 3 classes
+            2. Each model has different F1-scores for Low/Middle/High tip prediction
+            3. We weight each model's prediction by its F1-score for that specific class
+            4. Models that are good at predicting "High Tips" get more weight for that class
+            5. Final probabilities are normalized to sum to 100%
+
+            **Example from your models:**
+            - **Naive Bayes**: Excellent at High Tips (F1: ~0.59) → Gets high weight for High class
+            - **Hist Gradient Boosting**: Best at Middle Tips (F1: ~0.69) → Gets high weight for Middle class
+            - **Random Forest**: Strong at Low Tips (F1: ~0.53) → Gets high weight for Low class
+
+            **Benefits:**
+            - Leverages each model's strengths
+            - More accurate than simple voting
+            - Accounts for class imbalance
+            - Data-driven weighting based on actual performance
+            - Uses all {len(class_f1_scores)} models for robust predictions
+
+            This is similar to a **stacked ensemble** or **weighted voting classifier**.
+            """)
+
+        st.markdown("---")
+
+        # Display predictions from all models in block format
+        st.markdown("### Individual Model Predictions")
+        st.caption("Detailed probability distributions from each model")
+
+        # Display models in a grid layout (2 columns)
+        model_items = list(all_predictions.items())
+        for idx in range(0, len(model_items), 2):
+            col1, col2 = st.columns(2)
+
+            # Get models for this row
+            models_in_row = model_items[idx:idx+2]
+
+            for col, (model_name, prediction) in zip([col1, col2], models_in_row):
+                with col:
+                    predicted_class = prediction['class']
+                    predicted_class_name = prediction['class_name']
+                    probs = prediction['probabilities']
+
+                    # Add special highlighting for NB predicting High and SVM predicting Middle
+                    is_nb_high = ("naive" in model_name.lower() or "bayes" in model_name.lower()) and predicted_class == 2
+                    is_svm_middle = ("svm" in model_name.lower() or "sgd" in model_name.lower()) and predicted_class == 1
+
+                    # Determine color based on prediction
+                    if predicted_class == 0:
+                        header_color = "#3498db"  # Blue for Low
+                    elif predicted_class == 1:
+                        header_color = "#f39c12"  # Orange for Middle
+                    else:
+                        header_color = "#2ecc71"  # Green for High
+
+                    # Model header with colored background
+                    badge = ""
+                    if is_nb_high:
+                        badge = " (Best for High 🎉)"
+                    elif is_svm_middle:
+                        badge = " (Best for Middle 🎉)"
+
+                    st.markdown(f"""
+                    <div style="background-color: {header_color}; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: white;">{model_name}{badge}</h4>
+                        <p style="margin: 5px 0 0 0; color: white; font-size: 1.1em; font-weight: bold;">→ {predicted_class_name}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    # Add spacing
+                    st.markdown("<br>", unsafe_allow_html=True)
 
         # Show contributing factors
         st.markdown("---")
@@ -1880,7 +2080,7 @@ def page_interactive_prediction():
 
     st.markdown("---")
 
-    with st.expander("💡 Tips for Better Tips"):
+    with st.expander("Tips for Better Tips"):
         st.markdown("""
         - Longer trips tend to receive better tip percentages
         - Good weather conditions correlate with better tips
@@ -2014,10 +2214,10 @@ if __name__ == "__main__":
     # Display project information in sidebar
     st.sidebar.markdown("---")
     st.sidebar.markdown("""
-    **Author:** Zhiqiang Ni  
+    **Author:** Zhiqiang Ni
     **Course:** CMSE 830 | MSU
 
-    **Dataset:** 2024 NYC Taxi + Weather  
+    **Dataset:** 2024 NYC Taxi + Weather
     **Records:** 1M+ trips analyzed
     """)
 

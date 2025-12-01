@@ -8,15 +8,9 @@ import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import seaborn as sns
 
-from Project.streamlit_app import load_model
-
 # Set random seed for reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
-
-# Check if GPU is available
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Using device: {device}")
 
 class MLP(nn.Module):
     """Multi-Layer Perceptron for taxi tip classification"""
@@ -240,112 +234,116 @@ def evaluate_model(model, test_loader, device='cpu'):
 
     return accuracy, all_predictions, all_labels
 
+if __name__ == '__main__':
+    # Check if GPU is available
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
 
-# 1. Load Data
-print("Loading data...")
-data_path = 'data/processed_taxi_data.pt'
-data = torch.load(data_path)
+    # 1. Load Data
+    print("Loading data...")
+    data_path = 'data/processed_taxi_data.pt'
+    data = torch.load(data_path)
 
-X_train = data['X_train']
-y_train = data['y_train']
-X_test = data['X_test']
-y_test = data['y_test']
+    X_train = data['X_train']
+    y_train = data['y_train']
+    X_test = data['X_test']
+    y_test = data['y_test']
 
-print(f"Training set: {X_train.shape}")
-print(f"Test set: {X_test.shape}")
-print(f"Number of features: {X_train.shape[1]}")
-print(f"Number of classes: {len(torch.unique(y_train))}\n")
+    print(f"Training set: {X_train.shape}")
+    print(f"Test set: {X_test.shape}")
+    print(f"Number of features: {X_train.shape[1]}")
+    print(f"Number of classes: {len(torch.unique(y_train))}\n")
 
-# 2. Create DataLoaders
-batch_size = 64
+    # 2. Create DataLoaders
+    batch_size = 64
 
-train_dataset = TensorDataset(X_train, y_train)
-test_dataset = TensorDataset(X_test, y_test)
+    train_dataset = TensorDataset(X_train, y_train)
+    test_dataset = TensorDataset(X_test, y_test)
 
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
-print(f"Batch size: {batch_size}")
-print(f"Number of training batches: {len(train_loader)}")
-print(f"Number of test batches: {len(test_loader)}\n")
+    print(f"Batch size: {batch_size}")
+    print(f"Number of training batches: {len(train_loader)}")
+    print(f"Number of test batches: {len(test_loader)}\n")
 
-# 3. Model Configuration
-input_size = X_train.shape[1]
-hidden_sizes = [256, 128, 64, 32]  # Three hidden layers
-num_classes = len(torch.unique(y_train))
-dropout_rate = 0.2
+    # 3. Model Configuration
+    input_size = X_train.shape[1]
+    hidden_sizes = [256, 128, 64, 32]  # Three hidden layers
+    num_classes = len(torch.unique(y_train))
+    dropout_rate = 0.2
 
-# 4. Initialize Model
-model = MLP(input_size, hidden_sizes, num_classes, dropout_rate).to(device)
-print("Model Architecture:")
-print(model)
-print(f"\nTotal parameters: {sum(p.numel() for p in model.parameters()):,}\n")
+    # 4. Initialize Model
+    model = MLP(input_size, hidden_sizes, num_classes, dropout_rate).to(device)
+    print("Model Architecture:")
+    print(model)
+    print(f"\nTotal parameters: {sum(p.numel() for p in model.parameters()):,}\n")
 
-# 5. Loss Function and Optimizer
-class_counts = torch.bincount(y_train.long())
-total_samples = len(y_train)
+    # 5. Loss Function and Optimizer
+    class_counts = torch.bincount(y_train.long())
+    total_samples = len(y_train)
 
-print("\nClass Distribution:")
-for i, count in enumerate(class_counts):
-    percentage = 100 * count / total_samples
-    print(f"  Class {i} (Tip {'Low' if i==0 else 'Mid' if i==1 else 'High'}): {count:,} samples ({percentage:.2f}%)")
+    print("\nClass Distribution:")
+    for i, count in enumerate(class_counts):
+        percentage = 100 * count / total_samples
+        print(f"  Class {i} (Tip {'Low' if i==0 else 'Mid' if i==1 else 'High'}): {count:,} samples ({percentage:.2f}%)")
 
-imbalance_ratio = class_counts.max().item() / class_counts.min().item()
-print(f"\nImbalance Ratio: {imbalance_ratio:.2f}:1")
+    imbalance_ratio = class_counts.max().item() / class_counts.min().item()
+    print(f"\nImbalance Ratio: {imbalance_ratio:.2f}:1")
 
-# Calculate class weights using inverse frequency
-# This gives higher weight to minority classes
-class_weights = 1.0 / class_counts.float()
-class_weights = class_weights / class_weights.sum() * len(class_weights)
-class_weights = class_weights.to(device)
+    # Calculate class weights using inverse frequency
+    # This gives higher weight to minority classes
+    class_weights = 1.0 / class_counts.float()
+    class_weights = class_weights / class_weights.sum() * len(class_weights)
+    class_weights = class_weights.to(device)
 
-print(f"\nClass Weights Applied:")
-for i, weight in enumerate(class_weights):
-    print(f"  Class {i}: {weight:.4f}x")
-print("="*60 + "\n")
+    print(f"\nClass Weights Applied:")
+    for i, weight in enumerate(class_weights):
+        print(f"  Class {i}: {weight:.4f}x")
+    print("="*60 + "\n")
 
-criterion = nn.CrossEntropyLoss(weight=class_weights)
-optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
 
-# Optional: Learning rate scheduler
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+    # Optional: Learning rate scheduler
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
 
-# 6. Train Model
-print("Starting training...\n")
-num_epochs = 20
+    # 6. Train Model
+    print("Starting training...\n")
+    num_epochs = 20
 
-train_losses, val_losses, train_accuracies, val_accuracies = train_mlp(
-    model, train_loader, test_loader, criterion, optimizer,
-    num_epochs=num_epochs, device=device
-)
+    train_losses, val_losses, train_accuracies, val_accuracies = train_mlp(
+        model, train_loader, test_loader, criterion, optimizer,
+        num_epochs=num_epochs, device=device
+    )
 
-# Update learning rate based on validation loss
-# Note: In a real scenario, you'd use a separate validation set
-# scheduler.step(val_losses[-1])
+    # Update learning rate based on validation loss
+    # Note: In a real scenario, you'd use a separate validation set
+    # scheduler.step(val_losses[-1])
 
-# 7. Plot Training History
-plot_training_history(train_losses, val_losses, train_accuracies, val_accuracies)
+    # 7. Plot Training History
+    plot_training_history(train_losses, val_losses, train_accuracies, val_accuracies)
 
-# 8. Evaluate Model
-accuracy, predictions, labels = evaluate_model(model, test_loader, device)
+    # 8. Evaluate Model
+    accuracy, predictions, labels = evaluate_model(model, test_loader, device)
 
-# 9. Save Model
-model_path = 'models/mlp_tip_classifier.pth'
-torch.save({
-    'model_state_dict': model.state_dict(),
-    'optimizer_state_dict': optimizer.state_dict(),
-    'train_losses': train_losses,
-    'val_losses': val_losses,
-    'train_accuracies': train_accuracies,
-    'val_accuracies': val_accuracies,
-    'accuracy': accuracy,
-    'model_config': {
-        'input_size': input_size,
-        'hidden_sizes': hidden_sizes,
-        'num_classes': num_classes,
-        'dropout_rate': dropout_rate
-    }
-}, model_path)
-print(f"\nModel saved to {model_path}")
+    # 9. Save Model
+    model_path = 'models/mlp_tip_classifier.pth'
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'train_losses': train_losses,
+        'val_losses': val_losses,
+        'train_accuracies': train_accuracies,
+        'val_accuracies': val_accuracies,
+        'accuracy': accuracy,
+        'model_config': {
+            'input_size': input_size,
+            'hidden_sizes': hidden_sizes,
+            'num_classes': num_classes,
+            'dropout_rate': dropout_rate
+        }
+    }, model_path)
+    print(f"\nModel saved to {model_path}")
 
 
