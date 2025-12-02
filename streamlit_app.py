@@ -171,7 +171,7 @@ def page_overview():
     **Navigation Guide:** Use the sidebar menu to explore different sections of this comprehensive analysis.
     """)
 
-
+@st.cache_data
 def load_parquet(path: str) -> pd.DataFrame:
     """
     Load Parquet file with caching to improve performance.
@@ -202,6 +202,7 @@ def get_parquet_shape(path: str) -> tuple:
     conn.close()
     return (row_count, len(sample.columns))
 
+@st.cache_data
 def load_parquet_head(path: str, n: int = 10) -> pd.DataFrame:
     """
     Load only the first N rows of a Parquet file using DuckDB for memory efficiency.
