@@ -42,6 +42,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 def page_overview():
     """
     Display the project overview page with introduction, data sources,
@@ -55,6 +56,11 @@ def page_overview():
         <p style="color: #e0e0e0; font-size: 1em; margin: 5px 0;">CMSE 830 Data Analysis Project | Zhiqiang Ni</p>
     </div>
     """, unsafe_allow_html=True)
+    st.warning("""
+    ⚠️ **Note on Model Files:** Due to GitHub's file size limitations (100MB per file), some trained model files 
+    could not be uploaded to the repository. The app displays pre-computed model performance metrics and 
+    visualizations. All model training code and results are documented in the notebooks and model evaluation sections.
+    """)
 
     # Key metrics with enhanced styling
     st.markdown("### Project At A Glance")
@@ -103,7 +109,7 @@ def page_overview():
         This comprehensive analysis combines **2024 NYC taxi trip records** with **hourly weather data** 
         to uncover patterns in passenger tipping behavior. Using advanced machine learning techniques, 
         we predict tip amounts and identify key factors influencing passenger generosity.
-        
+
         **Key Features:**
         - Best single model: Histogram Gradient Boosting (66.68% accuracy)
         - Weather impact analysis on tipping patterns
@@ -116,10 +122,10 @@ def page_overview():
         st.info("""
         **For Drivers:**  
         Understand factors affecting earnings
-        
+
         **For Passengers:**  
         Learn about tipping norms
-        
+
         **For Researchers:**  
         Insights into urban economics
         """)
@@ -139,7 +145,7 @@ def page_overview():
         - Historical Weather Data (Open-Meteo API)
         - Data cleaning, validation, and feature engineering
         - Missing value imputation (Iterative MICE)
-        
+
         #### Analysis & Visualization
         - 15+ interactive visualizations
         - Statistical and correlation analysis
@@ -152,7 +158,7 @@ def page_overview():
         - 8 different algorithms with class balancing
         - Comprehensive model comparison
         - Feature importance analysis
-        
+
         #### Interactive Features
         - Real-time tip prediction interface
         - Dynamic visualizations
@@ -161,15 +167,79 @@ def page_overview():
 
     st.markdown("---")
 
-    st.warning("""
-    ⚠️ **Note on Model Files:** Due to GitHub's file size limitations (100MB per file), some trained model files 
-    could not be uploaded to the repository. The app displays pre-computed model performance metrics and 
-    visualizations. All model training code and results are documented in the notebooks and model evaluation sections.
+    # How to Use This App Section
+    st.subheader("How to Use This App")
+
+    with st.expander("**Click here for a complete guide to navigating this application**", expanded=False):
+        st.markdown("""
+        ### Navigation Instructions
+
+        This interactive application is organized into **8 main sections**, accessible via the sidebar menu on the left:
+
+        #### **Overview** (Current Page)
+        - Get a high-level summary of the project
+        - Understand the research questions and goals
+        - See key metrics and project scope
+
+        #### **Data Collection**
+        - Explore the raw data sources (NYC Taxi & Weather data)
+        - View data samples before and after preprocessing
+        - Understand the data integration process
+        - **What to look for:** Data structure, column meanings, and data quality
+
+        #### **Initial Data Analysis (IDA)**
+        - Examine data types, distributions, and summary statistics
+        - Identify missing values and outliers
+        - Review data quality checks performed
+        - **What to look for:** Data characteristics, potential issues, and cleaning steps
+
+        #### **EDA & Visualization**
+        - Interact with 15+ dynamic visualizations
+        - Explore relationships between variables
+        - Discover patterns in tipping behavior
+        - **What to do:** Use filters and controls to customize visualizations
+        - **Key insights:** Temporal patterns, fare-tip relationships, weather impacts
+
+        #### **Advanced Analysis**
+        - Dive into correlation analysis
+        - Examine feature importance
+        - Understand weather impact on tips
+        - **What to look for:** Which factors most strongly influence tipping behavior
+
+        #### **Model Evaluation**
+        - Compare performance of 8 different ML models
+        - Review accuracy, precision, recall, and F1 scores
+        - Examine confusion matrices and classification reports
+        - **What to look for:** Which models perform best and why
+
+        #### **Interactive Prediction**
+        - **Try it yourself!** Input trip details to predict tip class
+        - Experiment with different scenarios (time, distance, weather)
+        - See real-time predictions from multiple models
+        - **What to do:** Adjust sliders and dropdowns to test different trip scenarios
+
+        #### **Methodology**
+        - Understand the complete data science workflow
+        - Review technical approaches and algorithms used
+        - See the tools and libraries employed
+        - **What to look for:** How the analysis was conducted from start to finish
+
+        ---
+
+        ### Key Features to Explore
+
+        1. **Interactive Charts:** All visualizations are built with Plotly - zoom, pan, and hover for details
+        2. **Data Tabs:** Switch between different datasets to compare before/after processing
+        3. **Model Comparison:** See side-by-side performance metrics for all models
+        4. **Real-time Predictions:** Test the models with your own trip scenarios
+
+        """)
+
+    st.success("""
+    **Ready to Start?** Use the sidebar menu on the left to begin exploring the analysis. 
+    Start with "Data Collection" to see the raw data, or jump to "Interactive Prediction" to try the models yourself!
     """)
 
-    st.info("""
-    **Navigation Guide:** Use the sidebar menu to explore different sections of this comprehensive analysis.
-    """)
 
 @st.cache_data
 def load_parquet(path: str) -> pd.DataFrame:
@@ -183,6 +253,7 @@ def load_parquet(path: str) -> pd.DataFrame:
         pd.DataFrame: Loaded dataframe
     """
     return pd.read_parquet(path)
+
 
 @st.cache_data
 def get_parquet_shape(path: str) -> tuple:
@@ -202,6 +273,7 @@ def get_parquet_shape(path: str) -> tuple:
     conn.close()
     return (row_count, len(sample.columns))
 
+
 @st.cache_data
 def load_parquet_head(path: str, n: int = 10) -> pd.DataFrame:
     """
@@ -219,6 +291,7 @@ def load_parquet_head(path: str, n: int = 10) -> pd.DataFrame:
     conn.close()
     return df
 
+
 def page_data_collection():
     """
     Display the data collection and preparation page, showing raw data sources
@@ -226,12 +299,20 @@ def page_data_collection():
     """
     st.header("Data Collection and Preparation")
 
+    # Instructions for this page
+    st.info("""
+    **What You'll Learn Here:** This section shows the raw data sources used in this analysis and how they were 
+    integrated. Explore the three tabs below to compare raw, preprocessed, and imputed data.
+
+    💡 **Tip:** Notice how the data evolves from raw taxi records to fully prepared ML-ready datasets with weather features!
+    """)
+
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("""
         **NYC TLC Trip Record Data**
-        - Yellow and Green taxi trips for 2024
+        - Yellow and Green taxi trips for 2024 (this is 2 different datasets combined)
         - Key Features: Pickup/dropoff times, locations, fares, tips
         - Source: [NYC TLC](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
         """)
@@ -250,9 +331,17 @@ def page_data_collection():
 
     st.subheader("Data Exploration")
 
+    st.markdown("""
+    **Tab Guide:**
+    - **Raw Data:** Original taxi records as downloaded from NYC TLC
+    - **Preprocessed Data:** After cleaning, merging with weather, and feature engineering (some missing values remain)
+    - **Imputed Data:** Final ML-ready dataset with all missing values filled
+    """)
+
     tab1, tab2, tab3 = st.tabs(["Raw Data", "Preprocessed Data", "Imputed Data"])
 
     with tab1:
+        st.caption("This is the original taxi trip data with basic information about each ride.")
         # Use efficient loading - only get shape and first 10 rows
         shape = get_parquet_shape(TAXI_SAMPLE)
         df_raw_head = load_parquet_head(TAXI_SAMPLE, 10)
@@ -266,23 +355,74 @@ def page_data_collection():
 
         st.dataframe(df_raw_head, width='stretch')
 
+        with st.expander("Understanding the Raw Data Columns"):
+            st.markdown("""
+            **Key Columns:**
+            - `tpep_pickup_datetime` / `lpep_pickup_datetime`: When the trip started
+            - `tpep_dropoff_datetime` / `lpep_dropoff_datetime`: When the trip ended
+            - `trip_distance`: Miles traveled
+            - `fare_amount`: Base fare charged
+            - `tip_amount`: Tip given by passenger
+            - `total_amount`: Total cost of the trip
+            - `passenger_count`: Number of passengers
+            - `PULocationID` / `DOLocationID`: Pickup/Dropoff zone IDs
+            """)
+
     with tab2:
+        st.caption("Data after cleaning, weather integration, and feature engineering. Notice the new columns!")
         # Use efficient loading - only get shape and first 10 rows
         shape = get_parquet_shape(TAXI_PREPROCESSED_MISSING_SAMPLED)
         df_preprocessed_head = load_parquet_head(TAXI_PREPROCESSED_MISSING_SAMPLED, 10)
 
         st.write(f"**Shape:** {shape[0]:,} rows × {shape[1]} columns")
         st.dataframe(df_preprocessed_head, width='stretch')
-        st.caption("Cleaned, merged with weather data, with engineered features.")
+
+        with st.expander("New Features Added"):
+            st.markdown("""
+            **Temporal Features:**
+            - `pickup_hour`: Hour of day (0-23)
+            - `day_of_week`: Day of week (0=Monday, 6=Sunday)
+            - `is_weekend`: Boolean for weekend trips
+            - `month`: Month of the year
+
+            **Trip Features:**
+            - `duration_min`: Trip duration in minutes
+            - `speed_mph`: Average speed during trip
+            - `fare_per_mile`: Fare divided by distance
+            - `tip_percentage`: Tip as percentage of fare
+            - `tip_class`: Our target variable (0=Low, 1=Middle, 2=High)
+
+            **Weather Features:**
+            - `temperature_2m`: Temperature in Celsius
+            - `precipitation`: Rainfall amount
+            - `windspeed_10m`: Wind speed
+            - And more weather variables...
+            """)
 
     with tab3:
+        st.caption("Final dataset with all missing values filled using Iterative Imputation (MICE).")
         # Use efficient loading - only get shape and first 10 rows
         shape = get_parquet_shape(TAXI_PREPROCESSED_SAMPLED)
         df_imputed_head = load_parquet_head(TAXI_PREPROCESSED_SAMPLED, 10)
 
         st.write(f"**Shape:** {shape[0]:,} rows × {shape[1]} columns")
         st.dataframe(df_imputed_head, width='stretch')
-        st.caption("Missing values filled using iterative imputation.")
+
+        st.success("This dataset is ready for machine learning! All missing values have been intelligently filled.")
+
+        with st.expander("About MICE Imputation"):
+            st.markdown("""
+            **Iterative Imputation (MICE - Multiple Imputation by Chained Equations):**
+
+            This sophisticated method:
+            1. Models each feature with missing values as a function of other features
+            2. Iteratively predicts missing values based on observed patterns
+            3. Preserves relationships between variables
+            4. More accurate than simple mean/median filling
+
+            **Applied to:** `passenger_count`, `RatecodeID`, and other numeric features with missing data.
+            """)
+
 
 @st.cache_data
 def compute_missing_values(df):
@@ -297,11 +437,13 @@ def compute_missing_values(df):
     )
     return missing_df[missing_df['missing'] > 0]
 
+
 @st.cache_data
 def compute_stats_summary(df):
     """Cache statistical summary computation"""
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
     return df[numeric_cols].describe().T
+
 
 @st.cache_data
 def get_column_stats(df, col):
@@ -314,13 +456,26 @@ def get_column_stats(df, col):
         'max': df[col].max()
     }
 
+
 def page_ida():
     """
     Display the Initial Data Analysis (IDA) page with missing values analysis,
     duplicates, statistical summaries, and preprocessing information.
     """
     st.header("Initial Data Analysis (IDA)")
-    
+
+    st.info("""
+    **What You'll Learn Here:** Explore the data quality, missing values, statistical summaries, and preprocessing steps.
+
+    **Key Sections:**
+    - **Missing Values:** See which variables had missing data and how much
+    - **Imputation Impact:** Compare distributions before and after filling missing values
+    - **Statistical Summaries:** Review descriptive statistics for all numeric features
+    - **Duplicates:** Check for and understand duplicate records
+
+    **Look for:** How missing data was handled and whether imputation preserved data distributions
+    """)
+
     # Load data once
     df_preprocessed = load_parquet(TAXI_PREPROCESSED_MISSING_SAMPLED)
     df_imputed = load_parquet(TAXI_PREPROCESSED_SAMPLED)
@@ -359,14 +514,14 @@ def page_ida():
 
     fig.add_trace(
         go.Histogram(x=df_preprocessed_sample[selected_col].dropna(), name="Original",
-                    marker_color='#3498db', nbinsx=30),
+                     marker_color='#3498db', nbinsx=30),
         row=1, col=1
     )
 
     if selected_col in df_imputed_sample.columns:
         fig.add_trace(
             go.Histogram(x=df_imputed_sample[selected_col].dropna(), name="Imputed",
-                        marker_color='#2ecc71', nbinsx=30),
+                         marker_color='#2ecc71', nbinsx=30),
             row=1, col=2
         )
 
@@ -434,7 +589,19 @@ def page_eda():
     Display the Exploratory Data Analysis (EDA) page with correlation analysis,
     temporal patterns, and weather impact visualizations.
     """
-    st.header("Exploratory Data Analysis")
+    st.header("Exploratory Data Analysis & Visualization")
+
+    st.info("""
+    **What You'll Learn Here:** Discover patterns and relationships in the data through interactive visualizations.
+
+    **Key Insights to Explore:**
+    - **Correlation Analysis:** Which features are most related to tip amounts?
+    - **Temporal Patterns:** When do people tip more? (time of day, day of week)
+    - **Fare Relationships:** How do trip distance and fare affect tips?
+    - **Weather Impact:** Does weather influence tipping behavior?
+
+    **Interactive Features:** Hover over charts for details, try different correlation methods, and explore various visualizations
+    """)
 
     df = load_parquet(TAXI_PREPROCESSED_SAMPLED)
 
@@ -513,7 +680,7 @@ def page_eda():
     st.subheader("Tip Class Distribution")
 
     col1, col2 = st.columns([1, 2])
-    
+
     with col1:
         tip_class_counts = df['tip_class'].value_counts().sort_index()
         st.metric("Low Tips (0)", f"{tip_class_counts.get(0, 0):,}")
@@ -547,7 +714,9 @@ def page_eda():
 
     numeric_cols_tip = df_tip.select_dtypes(include=[np.number]).columns.tolist()
     weather_candidates = [c for c in numeric_cols_tip if any(k in c.lower()
-                          for k in ['temperature','precipitation','rain','snowfall','wind_speed'])]
+                                                             for k in
+                                                             ['temperature', 'precipitation', 'rain', 'snowfall',
+                                                              'wind_speed'])]
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -591,11 +760,14 @@ def page_eda():
 
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Average", f"${tmp[tip_metric].mean():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].mean():.1f}%")
+                st.metric("Average",
+                          f"${tmp[tip_metric].mean():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].mean():.1f}%")
             with col2:
-                st.metric("Min", f"${tmp[tip_metric].min():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].min():.1f}%")
+                st.metric("Min",
+                          f"${tmp[tip_metric].min():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].min():.1f}%")
             with col3:
-                st.metric("Max", f"${tmp[tip_metric].max():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].max():.1f}%")
+                st.metric("Max",
+                          f"${tmp[tip_metric].max():.2f}" if tip_metric == 'tip_amount' else f"{tmp[tip_metric].max():.1f}%")
 
         except Exception as e:
             st.error(f"Error creating visualization: {str(e)}")
@@ -606,7 +778,21 @@ def page_advanced_analysis():
     Display advanced analysis page focusing on tip percentage patterns
     with multi-dimensional visualizations and insights.
     """
-    st.header("Advanced Analysis: Tip Percentage Insights")
+    st.header("🔬 Advanced Analysis: Tip Percentage Insights")
+
+    st.info("""
+    **What You'll Learn Here:** Deep dive into tip percentage patterns with multi-dimensional analysis.
+
+    **What's Different Here:**
+    - Focus on **tip percentage** (not absolute amounts) to understand generosity
+    - Multi-dimensional analysis combining weather, time, and trip characteristics
+    - Advanced visualizations including 3D scatter plots and heatmaps
+
+    **Key Questions Answered:**
+    - What percentage do people typically tip?
+    - How does weather affect tip percentage?
+    - Which combinations of factors lead to higher tips?
+    """)
 
     st.markdown("""
     This section provides in-depth analysis of tipping patterns, focusing on **tip percentage** 
@@ -650,16 +836,16 @@ def page_advanced_analysis():
             color_discrete_sequence=['#3498db']
         )
         fig.add_vline(x=df['tip_percentage'].mean(), line_dash="dash",
-                     line_color="red", annotation_text="Mean")
+                      line_color="red", annotation_text="Mean")
         fig.add_vline(x=df['tip_percentage'].median(), line_dash="dash",
-                     line_color="green", annotation_text="Median")
+                      line_color="green", annotation_text="Median")
         st.plotly_chart(fig, width='stretch')
 
     with col2:
         # Tip percentage categories
         tip_ranges = pd.cut(df['tip_percentage'],
-                           bins=[0, 10, 15, 20, 25, 100],
-                           labels=['0-10%', '10-15%', '15-20%', '20-25%', '>25%'])
+                            bins=[0, 10, 15, 20, 25, 100],
+                            labels=['0-10%', '10-15%', '15-20%', '20-25%', '>25%'])
         range_counts = tip_ranges.value_counts().sort_index()
 
         fig = px.pie(
@@ -792,16 +978,16 @@ def page_advanced_analysis():
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             x_var = st.selectbox("X-axis:", [c for c in numeric_cols if c != 'tip_percentage'],
-                                index=[c for c in numeric_cols if c != 'tip_percentage'].index('trip_distance')
-                                if 'trip_distance' in numeric_cols else 0, key="3d_x")
+                                 index=[c for c in numeric_cols if c != 'tip_percentage'].index('trip_distance')
+                                 if 'trip_distance' in numeric_cols else 0, key="3d_x")
         with col_b:
             y_var = st.selectbox("Y-axis:", [c for c in numeric_cols if c != 'tip_percentage'],
-                                index=[c for c in numeric_cols if c != 'tip_percentage'].index('fare_amount')
-                                if 'fare_amount' in numeric_cols else 0, key="3d_y")
+                                 index=[c for c in numeric_cols if c != 'tip_percentage'].index('fare_amount')
+                                 if 'fare_amount' in numeric_cols else 0, key="3d_y")
         with col_c:
             z_var = st.selectbox("Z-axis:", [c for c in numeric_cols if c != 'tip_percentage'],
-                                index=[c for c in numeric_cols if c != 'tip_percentage'].index('duration_min')
-                                if 'duration_min' in numeric_cols else 0, key="3d_z")
+                                 index=[c for c in numeric_cols if c != 'tip_percentage'].index('duration_min')
+                                 if 'duration_min' in numeric_cols else 0, key="3d_z")
 
         sample_df = df[[x_var, y_var, z_var, 'tip_percentage']].dropna().sample(min(2000, len(df))).copy()
 
@@ -1033,7 +1219,7 @@ weighted avg       0.45      0.45      0.45    697072""",
             'Recall': 0.5773,
             'F1-Score': 0.5800,
             'Training Time (s)': 1430.0,  # Approximate from 15 epochs
-            'Prediction Time (s)': 1.0,   # Approximate from evaluation
+            'Prediction Time (s)': 1.0,  # Approximate from evaluation
             'confusion_matrix': np.array([
                 [75204, 61337, 62776],
                 [11525, 159999, 55637],
@@ -1060,6 +1246,21 @@ def page_model_evaluation():
     performance metrics, feature importance, and interactive prediction.
     """
     st.header("Model Development & Evaluation")
+
+    st.info("""
+    **What You'll Learn Here:** Compare the performance of 8 different machine learning models trained to predict tip classes.
+
+    **What to Explore:**
+    - **Model Comparison:** See accuracy, precision, recall, and F1 scores for all 8 models
+    - **Best Performers:** Histogram Gradient Boosting achieves 66.68% accuracy
+    - **Confusion Matrices:** Understand which tip classes are easier/harder to predict
+    - **Classification Reports:** Detailed per-class performance metrics
+
+    **Key Insight:** The best model is 67% accurate - predicting tips is challenging! 
+    Many factors beyond our features influence tipping behavior.
+
+    **Note:** Due to file size limits, pre-computed results are shown. All training code is in the notebooks.
+    """)
 
     # Model information
     col1, col2 = st.columns(2)
@@ -1196,14 +1397,15 @@ def page_model_evaluation():
         )
         st.plotly_chart(fig, width='stretch')
 
-        st.info("💡 **Insight:** Look for models in the top-left corner for best performance with fastest training time. Bubble size indicates F1-Score.")
+        st.info(
+            "💡 **Insight:** Look for models in the top-left corner for best performance with fastest training time. Bubble size indicates F1-Score.")
 
     elif viz_type == 'Multi-Metric Dashboard':
         # Create subplots with multiple metrics
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=('Accuracy by Model', 'F1-Score by Model',
-                          'Training Time Comparison', 'Prediction Time Comparison'),
+                            'Training Time Comparison', 'Prediction Time Comparison'),
             specs=[[{'type': 'bar'}, {'type': 'bar'}],
                    [{'type': 'bar'}, {'type': 'bar'}]]
         )
@@ -1494,7 +1696,8 @@ def page_model_evaluation():
 
     with col2:
         st.info(f"**Fastest Training:** {fastest_training[0]} ({fastest_training[1]['Training Time (s)']:.2f}s)")
-        st.info(f"**Fastest Prediction:** {fastest_prediction[0]} ({fastest_prediction[1]['Prediction Time (s)']:.2f}s)")
+        st.info(
+            f"**Fastest Prediction:** {fastest_prediction[0]} ({fastest_prediction[1]['Prediction Time (s)']:.2f}s)")
 
 
 def page_interactive_prediction():
@@ -1504,13 +1707,31 @@ def page_interactive_prediction():
     """
     st.header("Interactive Tip Prediction")
 
+    st.success("""
+    **Try It Yourself!** This is the most interactive section - input trip details and see real-time predictions!
+
+    **How to Use:**
+    1. Adjust the sliders and dropdowns below to describe a taxi trip
+    2. Click "Predict Tip Class" button
+    3. See predictions from all 8 models simultaneously
+    4. Try different scenarios to see how predictions change
+
+    **Experiment Ideas:**
+    - Compare predictions for short vs. long trips
+    - See how weather affects predicted tips
+    - Test different times of day or days of week
+    - Compare rush hour vs. off-peak predictions
+    """)
+
     st.markdown("""
-    Use this tool to predict tip class based on trip and weather characteristics.
-    Adjust the parameters below to see how different factors might influence tipping behavior.
-    
     **All models will make predictions simultaneously.** Note that:
     - **Histogram Gradient Boosting** performs best overall and for both **High Tip** and **Middle Tip** classes
     - **Random Forest** performs best at predicting **Low Tip** class
+
+    **Tip Classes:**
+    - **Low** (0-10% tip)
+    - **Middle** (10-20% tip)  
+    - **High** (>20% tip)
     """)
 
     # Load available models
@@ -1577,16 +1798,17 @@ def page_interactive_prediction():
     # Display calculated features
     st.subheader("Calculated Features")
 
-    st.caption("Features are preprocessed using the same pipeline as training: cyclical encoding for time, standardization for numerical features, and one-hot/target encoding for categorical features.")
+    st.caption(
+        "Features are preprocessed using the same pipeline as training: cyclical encoding for time, standardization for numerical features, and one-hot/target encoding for categorical features.")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.metric("Average Speed", f"{speed_mph:.2f} mph")
     with col2:
-        st.metric("$ per Mile", f"${fare_amount/trip_distance:.2f}" if trip_distance > 0 else "$0.00")
+        st.metric("$ per Mile", f"${fare_amount / trip_distance:.2f}" if trip_distance > 0 else "$0.00")
     with col3:
-        st.metric("$ per Minute", f"${fare_amount/duration_min:.2f}" if duration_min > 0 else "$0.00")
+        st.metric("$ per Minute", f"${fare_amount / duration_min:.2f}" if duration_min > 0 else "$0.00")
 
     st.markdown("---")
 
@@ -1599,7 +1821,7 @@ def page_interactive_prediction():
         # Prepare feature vector matching the training preprocessing pipeline
         # Convert day_of_week to numeric (0-6)
         day_mapping = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3,
-                      'Friday': 4, 'Saturday': 5, 'Sunday': 6}
+                       'Friday': 4, 'Saturday': 5, 'Sunday': 6}
         day_num = day_mapping[day_of_week]
 
         # Apply cyclical encoding (same as training: sin/cos with max values)
@@ -1613,45 +1835,45 @@ def page_interactive_prediction():
 
         # 15 Base Numerical features (will be scaled by StandardScaler)
         numerical_features_values = [
-            passenger_count,      # passenger_count
-            trip_distance,        # trip_distance
-            fare_amount,          # fare_amount
-            0.0,                  # extra (default)
-            0.5,                  # mta_tax (default NYC rate)
-            0.0,                  # tolls_amount (default)
-            0.30,                 # improvement_surcharge (NYC default)
-            2.75,                 # congestion_surcharge (NYC default)
-            0.0,                  # Airport_fee (default)
-            duration_min,         # duration_min
-            temperature,          # apparent_temperature
-            0.0,                  # snowfall (default)
-            precipitation,        # precipitation
-            wind_speed,           # wind_speed_10m
-            speed_mph             # speed_mph
+            passenger_count,  # passenger_count
+            trip_distance,  # trip_distance
+            fare_amount,  # fare_amount
+            0.0,  # extra (default)
+            0.5,  # mta_tax (default NYC rate)
+            0.0,  # tolls_amount (default)
+            0.30,  # improvement_surcharge (NYC default)
+            2.75,  # congestion_surcharge (NYC default)
+            0.0,  # Airport_fee (default)
+            duration_min,  # duration_min
+            temperature,  # apparent_temperature
+            0.0,  # snowfall (default)
+            precipitation,  # precipitation
+            wind_speed,  # wind_speed_10m
+            speed_mph  # speed_mph
         ]
 
         # 4 Cyclical features (added to numerical)
         cyclical_features_values = [
-            pickup_hour_sin,      # pickup_hour_sin
-            pickup_hour_cos,      # pickup_hour_cos
-            day_of_week_sin,      # day_of_week_sin
-            day_of_week_cos       # day_of_week_cos
+            pickup_hour_sin,  # pickup_hour_sin
+            pickup_hour_cos,  # pickup_hour_cos
+            day_of_week_sin,  # day_of_week_sin
+            day_of_week_cos  # day_of_week_cos
         ]
 
         # Categorical features (low cardinality - will be one-hot encoded)
         # RatecodeID (1-6, 99), weather_code (~100 codes), is_yellow (0/1)
         # After one-hot encoding: ~107 features total
         cat_low_features_values = [
-            1,                    # RatecodeID (1 = Standard rate)
-            0,                    # weather_code (0 = clear sky)
-            1 if is_yellow else 0 # is_yellow (1 = yellow, 0 = green)
+            1,  # RatecodeID (1 = Standard rate)
+            0,  # weather_code (0 = clear sky)
+            1 if is_yellow else 0  # is_yellow (1 = yellow, 0 = green)
         ]
 
         # Categorical features (high cardinality - target encoded to 2 features)
         # PULocationID, DOLocationID (~260 locations each)
         cat_high_features_values = [
-            161,                  # PULocationID (161 = Midtown Manhattan)
-            161                   # DOLocationID (same as pickup)
+            161,  # PULocationID (161 = Midtown Manhattan)
+            161  # DOLocationID (same as pickup)
         ]
 
         # Store all predictions
@@ -1665,90 +1887,91 @@ def page_interactive_prediction():
 
         # Process available models first
         for model_name, model in available_models.items():
-                try:
-                    # Combine all raw features in order
-                    # After preprocessing pipeline applies transformations:
-                    # - Numerical (19): StandardScaler applied
-                    # - Categorical Low (3 raw → ~27 one-hot): OneHotEncoder
-                    # - Categorical High (2 raw → 2 target-encoded): TargetEncoder
-                    # Total after preprocessing: ~48 features
+            try:
+                # Combine all raw features in order
+                # After preprocessing pipeline applies transformations:
+                # - Numerical (19): StandardScaler applied
+                # - Categorical Low (3 raw → ~27 one-hot): OneHotEncoder
+                # - Categorical High (2 raw → 2 target-encoded): TargetEncoder
+                # Total after preprocessing: ~48 features
 
-                    all_raw_features = (numerical_features_values +
-                                       cyclical_features_values +
-                                       cat_low_features_values +
-                                       cat_high_features_values)
+                all_raw_features = (numerical_features_values +
+                                    cyclical_features_values +
+                                    cat_low_features_values +
+                                    cat_high_features_values)
 
-                    if isinstance(model, torch.nn.Module):
-                        # PyTorch model
-                        feature_vector = torch.tensor(all_raw_features, dtype=torch.float32).unsqueeze(0)
+                if isinstance(model, torch.nn.Module):
+                    # PyTorch model
+                    feature_vector = torch.tensor(all_raw_features, dtype=torch.float32).unsqueeze(0)
 
-                        # Pad to expected size (48 features) with zeros if needed
-                        if feature_vector.shape[1] < 48:
-                            padding = torch.zeros(1, 48 - feature_vector.shape[1])
-                            feature_vector = torch.cat([feature_vector, padding], dim=1)
+                    # Pad to expected size (48 features) with zeros if needed
+                    if feature_vector.shape[1] < 48:
+                        padding = torch.zeros(1, 48 - feature_vector.shape[1])
+                        feature_vector = torch.cat([feature_vector, padding], dim=1)
 
-                        with torch.no_grad():
-                            outputs = model(feature_vector)
-                            probs = torch.softmax(outputs, dim=1)[0].numpy()
-                            predicted_class = int(torch.argmax(outputs, dim=1)[0])
+                    with torch.no_grad():
+                        outputs = model(feature_vector)
+                        probs = torch.softmax(outputs, dim=1)[0].numpy()
+                        predicted_class = int(torch.argmax(outputs, dim=1)[0])
+                else:
+                    # Sklearn model
+                    # Create feature vector and pad to 48 features if needed
+                    feature_vector = np.array(all_raw_features + [0] * max(0, 48 - len(all_raw_features))).reshape(1,
+                                                                                                                   -1)
+
+                    predicted_class = int(model.predict(feature_vector)[0])
+
+                    # Get probabilities if available
+                    if hasattr(model, 'predict_proba'):
+                        probs = model.predict_proba(feature_vector)[0]
                     else:
-                        # Sklearn model
-                        # Create feature vector and pad to 48 features if needed
-                        feature_vector = np.array(all_raw_features + [0] * max(0, 48 - len(all_raw_features))).reshape(1, -1)
+                        # For models without probability estimates, create a one-hot vector
+                        probs = np.zeros(3)
+                        probs[predicted_class] = 1.0
 
-                        predicted_class = int(model.predict(feature_vector)[0])
+                all_predictions[model_name] = {
+                    'class': predicted_class,
+                    'class_name': tip_classes[predicted_class],
+                    'probabilities': probs.tolist() if isinstance(probs, np.ndarray) else probs
+                }
 
-                        # Get probabilities if available
-                        if hasattr(model, 'predict_proba'):
-                            probs = model.predict_proba(feature_vector)[0]
-                        else:
-                            # For models without probability estimates, create a one-hot vector
-                            probs = np.zeros(3)
-                            probs[predicted_class] = 1.0
-
-                    all_predictions[model_name] = {
-                        'class': predicted_class,
-                        'class_name': tip_classes[predicted_class],
-                        'probabilities': probs.tolist() if isinstance(probs, np.ndarray) else probs
-                    }
-
-                except Exception as e:
-                    st.warning(f"⚠️ {model_name}: Using fallback prediction ({str(e)[:50]}...)")
-                    # Fallback to heuristic for this model
-                    tip_score = (
-                        trip_distance/10 +
-                        fare_amount/50 +
+            except Exception as e:
+                st.warning(f"⚠️ {model_name}: Using fallback prediction ({str(e)[:50]}...)")
+                # Fallback to heuristic for this model
+                tip_score = (
+                        trip_distance / 10 +
+                        fare_amount / 50 +
                         (1 if temperature > 50 and temperature < 80 else 0) +
                         (1 if precipitation < 5 else 0) +
                         (0.5 if is_weekend else 0) +
                         (0.3 if passenger_count > 1 else 0) -
                         (0.5 if speed_mph < 5 else 0)  # Penalize very slow speeds (traffic)
-                    )
+                )
 
-                    if tip_score >= 2.2:
-                        predicted_class = 2
-                        probs = [0.15, 0.30, 0.55]
-                    elif tip_score >= 1.2:
-                        predicted_class = 1
-                        probs = [0.20, 0.60, 0.20]
-                    else:
-                        predicted_class = 0
-                        probs = [0.65, 0.30, 0.05]
+                if tip_score >= 2.2:
+                    predicted_class = 2
+                    probs = [0.15, 0.30, 0.55]
+                elif tip_score >= 1.2:
+                    predicted_class = 1
+                    probs = [0.20, 0.60, 0.20]
+                else:
+                    predicted_class = 0
+                    probs = [0.65, 0.30, 0.05]
 
-                    all_predictions[model_name] = {
-                        'class': predicted_class,
-                        'class_name': tip_classes[predicted_class],
-                        'probabilities': probs
-                    }
+                all_predictions[model_name] = {
+                    'class': predicted_class,
+                    'class_name': tip_classes[predicted_class],
+                    'probabilities': probs
+                }
 
         # If no models were loaded, use heuristics as fallback
         if not all_predictions:
             # Simple heuristic for demonstration
-            tip_score = (trip_distance/10 + fare_amount/50 +
-                       (1 if temperature > 50 and temperature < 80 else 0) +
-                       (1 if precipitation < 5 else 0) +
-                       (0.5 if is_weekend else 0) +
-                       (0.5 if passenger_count > 1 else 0))
+            tip_score = (trip_distance / 10 + fare_amount / 50 +
+                         (1 if temperature > 50 and temperature < 80 else 0) +
+                         (1 if precipitation < 5 else 0) +
+                         (0.5 if is_weekend else 0) +
+                         (0.5 if passenger_count > 1 else 0))
 
             # Create demo predictions for different "models"
             demo_models = ['Logistic Regression', 'Random Forest', 'Naive Bayes', 'SVM (Linear SGD)']
@@ -1824,7 +2047,8 @@ def page_interactive_prediction():
         consensus_classes = [tip_classes[k] for k, v in prediction_counts.items() if v == max_count]
 
         if max_count > len(all_predictions) / 2:
-            st.success(f"**Strong Consensus:** Most models predict **{consensus_classes[0]}** ({max_count}/{len(all_predictions)} models)")
+            st.success(
+                f"**Strong Consensus:** Most models predict **{consensus_classes[0]}** ({max_count}/{len(all_predictions)} models)")
         elif len(consensus_classes) == 1:
             st.info(f"**Majority Prediction:** {consensus_classes[0]} ({max_count}/{len(all_predictions)} models)")
         else:
@@ -1951,7 +2175,7 @@ def page_interactive_prediction():
                 'Middle Tip (10-20%)': '#f39c12',
                 'High Tip (>20%)': '#27ae60'
             },
-            text=[f"{p*100:.1f}%" for p in weighted_probs],
+            text=[f"{p * 100:.1f}%" for p in weighted_probs],
             title="Weighted Probability Distribution"
         )
         fig_weighted.update_traces(textposition='outside')
@@ -2021,7 +2245,7 @@ def page_interactive_prediction():
             col1, col2 = st.columns(2)
 
             # Get models for this row
-            models_in_row = model_items[idx:idx+2]
+            models_in_row = model_items[idx:idx + 2]
 
             for col, (model_name, prediction) in zip([col1, col2], models_in_row):
                 with col:
@@ -2087,100 +2311,410 @@ def page_methodology():
     """
     st.header("Methodology & Techniques")
 
-    # Workflow
-    st.subheader("Data Science Workflow")
+    st.markdown("""
+    This project follows a rigorous data science methodology from raw data to deployment:
+    """)
 
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("""
-        1. **Data Collection & Integration**
-        2. **Data Cleaning**
-        3. **Feature Engineering**
-        4. **Missing Data Imputation**
+        #### Phase 1: Data Acquisition & Preparation
+        **1. Data Collection**
+        - Downloaded 2024 NYC Yellow & Green Taxi trip records
+        - Retrieved hourly weather data via Open-Meteo API
+        - ~3M+ taxi records combined with weather observations
+        
+        **2. Data Cleaning & Integration**
+        - Removed invalid records (negative fares, extreme outliers)
+        - Merged taxi and weather data on pickup timestamp
+        - Validated data types and ranges
+        - Handled duplicate records
+        
+        **3. Feature Engineering**
+        - Created temporal features (hour, day, weekend indicator)
+        - Calculated trip metrics (duration, speed, fare per mile)
+        - Derived tip percentage and tip class labels
+        - Engineered interaction features
+        
+        **4. Missing Data Imputation**
+        - Analyzed missing data patterns (MCAR, MAR, MNAR)
+        - Applied Iterative Imputation (MICE algorithm)
+        - Validated imputation quality
         """)
     with col2:
         st.markdown("""
-        5. **Exploratory Analysis**
-        6. **Model Development**
-        7. **Model Evaluation**
-        8. **Deployment**
+        #### Phase 2: Analysis & Modeling
+        **5. Exploratory Data Analysis (EDA)**
+        - Statistical summaries and distributions
+        - Correlation analysis (Pearson, Spearman, Kendall)
+        - Temporal pattern identification
+        - Weather impact analysis
+        
+        **6. Model Development**
+        - Trained 8 different ML algorithms
+        - Applied class balancing techniques
+        - Hyperparameter tuning for best models
+        - Developed weighted ensemble method
+        
+        **7. Model Evaluation**
+        - Comprehensive metric comparison
+        - Confusion matrix analysis
+        - Per-class performance evaluation
+        - Cross-model validation
+        
+        **8. Deployment & Visualization**
+        - Interactive Streamlit application
+        - Real-time prediction interface
+        - Dynamic visualizations with Plotly
+        - Comprehensive documentation
         """)
 
     st.markdown("---")
 
-    # Data Processing Techniques
-    st.subheader("Key Techniques")
+    # Detailed Techniques
+    st.subheader("Detailed Methodologies")
 
-    tab1, tab2 = st.tabs(["Data Processing", "Model Development"])
+    tab1, tab2, tab3 = st.tabs([
+        "Data Processing",
+        "Machine Learning Models",
+        "Evaluation Framework",
+    ])
 
     with tab1:
         st.markdown("""
-        ### Data Collection & Integration
+        ### 1. Data Collection & Integration
         
         **Data Sources:**
-        1. NYC TLC Yellow & Green Taxi Data (Parquet format)
-        2. Historical Weather Data (Open-Meteo API, hourly)
+        - **NYC TLC Trip Record Data** (Parquet format)
+          - Yellow Taxi: Traditional street-hail taxis
+          - Green Taxi: Outer borough taxis
+          - Variables: 18+ features per trip
+          - Time period: January - December 2024
         
-        **Integration:** Temporal join based on pickup timestamp
+        - **Weather Data** (Open-Meteo API)
+          - Hourly meteorological observations
+          - Location: New York City area
+          - Variables: Temperature, precipitation, wind, pressure, humidity
+          - Temporal resolution: Hourly
         
-        ### Feature Engineering
+        **Integration Strategy:**
+        - Temporal join on pickup timestamp (nearest hour)
+        - Left join to preserve all taxi records
+        - Validated temporal alignment accuracy
         
-        **Derived Features:**
-        - **Temporal:** `pickup_hour`, `day_of_week`, `is_weekend`, `month`
-        - **Trip:** `duration_min`, `speed_mph`, `fare_per_mile`
-        - **Target:** `tip_class` (Low: 0-10%, Middle: 10-20%, High: >20%)
+        ---
         
-        ### Missing Data Handling
+        ### 2. Feature Engineering
         
-        **Technique:** Iterative Imputation (MICE)
-        - Models each feature with missing values as function of other features
-        - Preserves relationships between variables
-        - Applied to `passenger_count`, `RatecodeID`, and other numeric features
+        **Temporal Features:**
+        - `pickup_hour` (0-23): Hour of day for temporal patterns
+        - `day_of_week` (0-6): Day identifier (0=Monday)
+        - `is_weekend` (Boolean): Weekend vs. weekday indicator
+        - `month` (1-12): Monthly seasonality capture
+        
+        **Trip Characteristics:**
+        - `duration_min`: Trip duration in minutes
+        - `speed_mph`: Average speed = distance / (duration / 60)
+        - `fare_per_mile`: Efficiency metric = fare_amount / trip_distance
+        
+        **Target Variable:**
+        - `tip_percentage`: (tip_amount / fare_amount) × 100
+        - `tip_class`: Categorical encoding
+          - **Class 0 (Low)**: 0-10% tip
+          - **Class 1 (Middle)**: 10-20% tip
+          - **Class 2 (High)**: >20% tip
+        
+        **Rationale:**
+        - Temporal features capture time-dependent patterns
+        - Trip metrics normalize for trip characteristics
+        - Percentage-based target accounts for fare variability
+        
+        ---
+        
+        ### 3. Missing Data Handling
+        
+        **Analysis:**
+        - Identified missing patterns in `passenger_count`, `RatecodeID`
+        - Tested for MCAR (Missing Completely At Random)
+        - Evaluated missingness mechanisms
+        
+        **Imputation Method: Iterative Imputation (MICE)**
+        
+        **Algorithm:**
+        ```
+        1. Fill missing values with initial estimates (mean/median)
+        2. For each feature with missing values:
+           a. Use other features as predictors
+           b. Train regression model on observed values
+           c. Predict missing values
+        3. Repeat until convergence or max iterations
+        ```
+        
+        **Advantages:**
+        - Preserves variable relationships
+        - Accounts for uncertainty in predictions
+        - More sophisticated than simple mean/median
+        
+        **Implementation:**
+        - `sklearn.impute.IterativeImputer`
+        - Max iterations: 10
+        - Random state: 42 (reproducibility)
+        - Estimator: BayesianRidge (default)
+        
+        **Validation:**
+        - Compared distributions before/after imputation
+        - Verified statistical properties preserved
+        - No significant bias introduced
         """)
 
     with tab2:
         st.markdown("""
-        ### Model Validation & Selection
+        ### Machine Learning Algorithms
         
-        **Train-Test Split:** 80/20 with stratified sampling
+        Eight algorithms were trained and evaluated for tip class prediction:
         
-        **Evaluation Metrics:**
-        - Accuracy, Precision, Recall, F1-Score
-        - Confusion Matrix for per-class performance
+        ---
         
-        **Class Balancing:** Applied `class_weight='balanced'`
+        #### 1. Logistic Regression
+        **Type:** Linear classifier  
+        **Use Case:** Baseline multi-class model  
+        **Configuration:**
+        - Solver: 'lbfgs' (limited-memory BFGS)
+        - Max iterations: 1000
+        - Class weight: 'balanced'
+        - Multi-class: 'multinomial'
         
-        **Models Tested:** 7 algorithms from Logistic Regression to Gradient Boosting
+        **Strengths:** Fast, interpretable, good baseline  
+        **Limitations:** Assumes linear decision boundaries
+        
+        ---
+        
+        #### 2. Decision Tree
+        **Type:** Tree-based classifier  
+        **Use Case:** Non-linear patterns, feature importance  
+        **Configuration:**
+        - Max depth: None (grow until pure)
+        - Min samples split: 2
+        - Class weight: 'balanced'
+        - Criterion: 'gini'
+        
+        **Strengths:** Interpretable, handles non-linearity  
+        **Limitations:** Prone to overfitting, high variance
+        
+        ---
+        
+        #### 3. Random Forest
+        **Type:** Ensemble of decision trees  
+        **Use Case:** Robust predictions, reduced overfitting  
+        **Configuration:**
+        - N estimators: 100 trees
+        - Max depth: None
+        - Class weight: 'balanced'
+        - Bootstrap: True
+        
+        **Strengths:** Reduces overfitting, handles complex patterns  
+        **Limitations:** Less interpretable, computationally intensive
+        
+        ---
+        
+        #### 4. Histogram Gradient Boosting **BEST PERFORMER**
+        **Type:** Gradient boosting with histogram binning  
+        **Use Case:** State-of-the-art performance  
+        **Configuration:**
+        - Max iterations: 100
+        - Learning rate: 0.1
+        - Max depth: None
+        - Early stopping: Enabled
+        
+        **Strengths:** Excellent performance, handles large datasets  
+        **Performance:** 66.68% accuracy (best overall)  
+        **Why it works:** Sequential error correction + efficient binning
+        
+        ---
+        
+        #### 5. K-Nearest Neighbors (KNN)
+        **Type:** Instance-based learning  
+        **Use Case:** Local pattern recognition  
+        **Configuration:**
+        - N neighbors: 5
+        - Weights: 'uniform'
+        - Algorithm: 'auto'
+        - Metric: 'minkowski'
+        
+        **Strengths:** Simple, no training phase  
+        **Limitations:** Slow predictions, sensitive to scale
+        
+        ---
+        
+        #### 6. Naive Bayes (Gaussian)
+        **Type:** Probabilistic classifier  
+        **Use Case:** Fast predictions, probabilistic outputs  
+        **Configuration:**
+        - Prior: None (learned from data)
+        - Variance smoothing: 1e-9
+        
+        **Strengths:** Fast, works well with limited data  
+        **Limitations:** Assumes feature independence
+        
+        ---
+        
+        #### 7. Support Vector Machine (Linear SGD)
+        **Type:** Linear classifier with margin maximization  
+        **Use Case:** Large-scale linear classification  
+        **Configuration:**
+        - Loss: 'hinge'
+        - Class weight: 'balanced'
+        - Max iterations: 1000
+        - Alpha: 0.0001
+        
+        **Strengths:** Efficient for large datasets  
+        **Limitations:** Linear decision boundary only
+        
+        ---
+        
+        #### 8. Multi-Layer Perceptron (MLP)
+        **Type:** Neural network  
+        **Use Case:** Deep learning approach  
+        **Configuration:**
+        - Architecture: 3 hidden layers [128, 64, 32]
+        - Activation: ReLU
+        - Optimizer: Adam
+        - Batch size: 256
+        - Epochs: 50 with early stopping
+        - Dropout: 0.3 (regularization)
+        
+        **Strengths:** Learns complex non-linear patterns  
+        **Limitations:** Requires more data, longer training
+        
+        ---
+        
+        ### Ensemble Method: Weighted Voting
+        
+        **Strategy:** Combine all models using class-specific F1-scores as weights
+        
+        **Algorithm:**
+        ```
+        For each class c:
+            weighted_prob[c] = Σ(model_prob[c] × model_F1[c]) / Σ(model_F1[c])
+        
+        Final prediction = argmax(weighted_prob)
+        ```
+        
+        **Advantages:**
+        - Leverages strengths of all models
+        - Adapts to class-specific performance
+        - More robust than single model
         """)
 
-    st.markdown("---")
-
-    # Technical Stack
-    st.subheader("Technical Stack")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
+    with tab3:
         st.markdown("""
-        **Data Processing**
-        - pandas, numpy
-        - scikit-learn
+        ### Evaluation Framework
+        
+        ---
+        
+        ### 1. Train-Test Split
+        
+        **Strategy:** Stratified random sampling
+        - **Training set:** 80% of data
+        - **Test set:** 20% of data
+        - **Stratification:** Preserves tip class distribution
+        - **Random state:** 42 (reproducibility)
+        
+        **Why stratified?**
+        - Ensures balanced class representation
+        - Prevents bias in train/test sets
+        - Critical for imbalanced datasets
+        
+        ---
+        
+        ### 2. Evaluation Metrics
+        
+        #### Primary Metrics:
+        
+        **Accuracy**
+        ```
+        Accuracy = (TP + TN) / Total Predictions
+        ```
+        - Overall correctness across all classes
+        - Range: 0 to 1 (higher is better)
+        
+        **Precision (per class)**
+        ```
+        Precision = TP / (TP + FP)
+        ```
+        - What fraction of positive predictions are correct?
+        - Important for minimizing false positives
+        
+        **Recall (per class)**
+        ```
+        Recall = TP / (TP + FN)
+        ```
+        - What fraction of actual positives are detected?
+        - Important for minimizing false negatives
+        
+        **F1-Score**
+        ```
+        F1 = 2 × (Precision × Recall) / (Precision + Recall)
+        ```
+        - Harmonic mean of precision and recall
+        - Balanced measure of performance
+        - Primary metric for model comparison
+        
+        #### Secondary Metrics:
+        
+        **Confusion Matrix**
+        - Per-class prediction breakdown
+        - Identifies systematic errors
+        - Visual assessment of model behavior
+        
+        **Training Time**
+        - Computational efficiency
+        - Practical deployment considerations
+        
+        **Prediction Time**
+        - Real-time inference speed
+        - User experience impact
+        
+        ---
+        
+        ### 3. Class Imbalance Handling
+        
+        **Problem:** Unequal distribution of tip classes
+        - Low tips: ~28%
+        - Middle tips: ~33%
+        - High tips: ~39%
+        
+        **Solution:** Class weighting
+        ```
+        class_weight[i] = n_samples / (n_classes × n_samples_class[i])
+        ```
+        
+        **Effect:**
+        - Penalizes errors on minority classes more
+        - Encourages balanced learning
+        - Prevents bias toward majority class
+        
+        ---
+        
+        ### 4. Model Comparison Framework
+        
+        **Criteria:**
+        1. **F1-Score** (primary): Balanced performance measure
+        2. **Accuracy**: Overall correctness
+        3. **Per-class performance**: Identify class-specific strengths
+        4. **Training efficiency**: Practical deployment considerations
+        5. **Prediction speed**: Real-time inference capability
+        
+        **Selection Process:**
+        1. Rank models by F1-score
+        2. Validate on confusion matrices
+        3. Consider computational costs
+        4. Select best single model + ensemble
+        
+        **Result:**
+        - **Best Single Model:** Histogram Gradient Boosting (66.68% accuracy)
+        - **Best Ensemble:** Weighted voting across all models
         """)
-
-    with col2:
-        st.markdown("""
-        **Visualization**
-        - plotly
-        - streamlit
-        """)
-
-    with col3:
-        st.markdown("""
-        **Storage**
-        - parquet
-        - pickle
-        """)
-
 
 # Entry point of the application
 if __name__ == "__main__":
@@ -2191,13 +2725,13 @@ if __name__ == "__main__":
         "Navigate to:",
         [
             "Overview",
+            "Methodology",
             "Data Collection",
             "Initial Data Analysis",
             "EDA & Visualization",
             "Advanced Analysis",
             "Model Evaluation",
             "Interactive Prediction",
-            "Methodology"
         ],
         index=0
     )
@@ -2212,9 +2746,41 @@ if __name__ == "__main__":
     **Records:** 3M+ trips analyzed
     """)
 
+    # Context-sensitive tips based on current page
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("Quick Tips")
+
+    tips_dict = {
+        "Overview": "Start here to understand the project scope and goals. Click the expander for a complete app guide!",
+        "Data Collection": "Compare the three data tabs to see how data evolved from raw to ML-ready format.",
+        "Initial Data Analysis": "Check the imputation impact visualization to see how missing values were handled.",
+        "EDA & Visualization": "Hover over charts for detailed info. Try different correlation methods!",
+        "Advanced Analysis": "Look at the 3D scatter plot to see multi-dimensional relationships.",
+        "Model Evaluation": "Compare all 8 models side-by-side. Hist. Gradient Boosting performs best!",
+        "Interactive Prediction": "This is the fun part! Try extreme scenarios to test the models.",
+        "Methodology": "Review this to understand the complete data science workflow used."
+    }
+
+    st.sidebar.info(tips_dict.get(menu, "Navigate using the menu above."))
+
+    # Additional help
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("""
+    ### Suggested Path
+    1. Overview
+    2. Data Collection  
+    3. EDA & Visualization
+    4. Model Evaluation
+    5. Interactive Prediction
+
+    **Or jump directly to Interactive Prediction to try the models!**
+    """)
+
     # Route to appropriate page based on menu selection
     if menu == "Overview":
         page_overview()
+    elif menu == "Methodology":
+        page_methodology()
     elif menu == "Data Collection":
         page_data_collection()
     elif menu == "Initial Data Analysis":
@@ -2227,5 +2793,4 @@ if __name__ == "__main__":
         page_model_evaluation()
     elif menu == "Interactive Prediction":
         page_interactive_prediction()
-    elif menu == "Methodology":
-        page_methodology()
+
